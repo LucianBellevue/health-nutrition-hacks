@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 /**
  * Site header with logo, navigation, and theme toggle
@@ -14,7 +15,14 @@ export default function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl">🥗</span>
+            <Image
+              src="/hnh_logo.svg"
+              alt="Health Nutrition Hacks logo"
+              width={28}
+              height={28}
+              className="invert-0 dark:invert"
+              priority
+            />
             <span className="text-xl font-bold text-white">
               Health Nutrition Hacks
             </span>

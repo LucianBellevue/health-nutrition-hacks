@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 /**
  * Site footer with copyright and links
@@ -12,8 +13,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">H</span>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                <Image
+                  src="/hnh_logo.svg"
+                  alt="Health Nutrition Hacks logo"
+                  width={32}
+                  height={32}
+                  className="invert-0 dark:invert"
+                />
               </div>
               <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
                 Health Nutrition Hacks
