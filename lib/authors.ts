@@ -73,6 +73,6 @@ export function getAuthorByIdOrDefault(id: string): Author {
     id: 'default',
     name: 'Health Nutrition Hacks Team',
     bio: 'Our team of nutrition experts and health professionals dedicated to bringing you evidence-based nutrition advice.',
-    avatarUrl: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop',
+    avatarUrl: '/hnh_logo.svg',
   };
 }

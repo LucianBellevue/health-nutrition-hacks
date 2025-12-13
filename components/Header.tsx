@@ -13,21 +13,21 @@ export default function Header() {
         </div>
       </div>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center space-x-2">
+        <div className="flex flex-wrap gap-4 items-center justify-between py-4">
+          <Link href="/" className="flex items-center gap-2">
             <Image
               src="/hnh_logo.svg"
               alt="Health Nutrition Hacks logo"
-              width={28}
-              height={28}
+              width={32}
+              height={32}
               className="invert-0 dark:invert"
               priority
             />
-            <span className="text-xl font-bold text-white">
+            <span className="text-lg sm:text-xl font-bold text-white whitespace-nowrap">
               Health Nutrition Hacks
             </span>
           </Link>
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-between text-sm sm:text-base">
             <Link
               href="/"
               className="text-zinc-300 hover:text-emerald-400 font-medium transition-colors"

@@ -12,10 +12,12 @@ import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import Image from 'next/image';
+import PostImage from '@/components/PostImage';
 
 // MDX components that can be used in posts
 const components = {
   AffiliateBlock,
+  PostImage,
 };
 
 // MDX options
