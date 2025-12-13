@@ -111,6 +111,8 @@ export default async function PostPage({ params }: Props) {
                 src={metadata.image}
                 alt={metadata.title}
                 className="w-full h-full object-cover"
+                width={1200}
+                height={630}
               />
             </div>
           )}

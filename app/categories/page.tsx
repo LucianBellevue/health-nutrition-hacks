@@ -45,7 +45,7 @@ export default function CategoriesPage() {
               href={`/categories/${category.slug}`}
               className="group"
             >
-              <div className="rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900/80 to-zinc-900/30 p-6 h-full shadow-[0_0_40px_rgba(6,182,212,0.08)] group-hover:border-emerald-500/60 transition-all duration-200">
+              <div className="rounded-2xl border border-zinc-800 bg-linear-to-b from-zinc-900/80 to-zinc-900/30 p-6 h-full shadow-[0_0_40px_rgba(6,182,212,0.08)] group-hover:border-emerald-500/60 transition-all duration-200">
                 <div className="flex items-start justify-between mb-4">
                   <h2 className="text-2xl font-semibold text-emerald-300 group-hover:text-emerald-200 transition-colors">
                     {category.name}

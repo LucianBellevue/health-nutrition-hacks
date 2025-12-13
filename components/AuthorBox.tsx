@@ -1,4 +1,5 @@
-import { Author } from '@/lib/authors';
+import Image from "next/image";
+import { Author } from "@/lib/authors";
 
 interface AuthorBoxProps {
   author: Author;
@@ -15,11 +16,16 @@ export default function AuthorBox({ author }: AuthorBoxProps) {
     <div className="my-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 shadow-sm">
       <div className="flex items-start gap-4">
         {/* Avatar */}
-        <img
-          src={author.avatarUrl}
-          alt={author.name}
-          className="w-16 h-16 rounded-full object-cover shrink-0"
-        />
+        <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0">
+          <Image
+            src={author.avatarUrl}
+            alt={author.name}
+            fill
+            sizes="64px"
+            className="object-cover"
+            priority={false}
+          />
+        </div>
 
         {/* Author Info */}
         <div className="flex-1">

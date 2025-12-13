@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { PostMetadata, Category } from '@/lib/posts';
 import PostCard from './PostCard';
 import SearchInput from './SearchInput';
 import CategoryFilter from './CategoryFilter';
 import EmptyState from './EmptyState';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setSearchQuery, setSelectedCategory, toggleFollowedCategory } from '@/store/slices/preferencesSlice';
 
 interface BlogListProps {
   posts: PostMetadata[];
@@ -16,8 +18,8 @@ interface BlogListProps {
  * Client component for blog list with search and category filtering
  */
 export default function BlogList({ posts, categories }: BlogListProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
+  const dispatch = useAppDispatch();
+  const { searchQuery, selectedCategory, followedCategories, initialized } = useAppSelector((state) => state.preferences);
 
   // Filter posts based on search query and selected category
   const filteredPosts = useMemo(() => {
@@ -55,13 +57,16 @@ export default function BlogList({ posts, categories }: BlogListProps) {
       <div className="mb-8 space-y-4">
         <SearchInput
           value={searchQuery}
-          onChange={setSearchQuery}
+          onChange={(value) => dispatch(setSearchQuery(value))}
           placeholder="Search posts by title, description, or tags..."
+          disabled={!initialized}
         />
         <CategoryFilter
           categories={categories}
           selectedCategorySlug={selectedCategory}
-          onChange={setSelectedCategory}
+          onChange={(slug) => dispatch(setSelectedCategory(slug))}
+          followedCategories={followedCategories}
+          onToggleFollow={(slug) => dispatch(toggleFollowedCategory(slug))}
         />
       </div>
 

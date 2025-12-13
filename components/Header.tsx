@@ -7,7 +7,7 @@ import Image from 'next/image';
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800">
-      <div className="bg-gradient-to-br from-emerald-500 to-teal-500 py-1">
+      <div className="bg-linear-to-br from-emerald-500 to-teal-500 py-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white text-sm font-medium">
           🌱 Your trusted source for evidence-based nutrition tips
         </div>

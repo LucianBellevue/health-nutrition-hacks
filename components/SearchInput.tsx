@@ -4,6 +4,7 @@ interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 /**
@@ -13,6 +14,7 @@ export default function SearchInput({
   value,
   onChange,
   placeholder = 'Search posts...',
+  disabled = false,
 }: SearchInputProps) {
   return (
     <div className="relative w-full">
@@ -37,7 +39,8 @@ export default function SearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="block w-full pl-10 pr-3 py-3 border border-zinc-300 rounded-lg bg-white text-zinc-900 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+        disabled={disabled}
+        className="block w-full pl-10 pr-3 py-3 border border-zinc-300 rounded-lg bg-white text-zinc-900 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors disabled:bg-zinc-100 disabled:text-zinc-400 disabled:cursor-not-allowed"
       />
     </div>
   );

@@ -3,6 +3,9 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ReduxProvider from "@/components/providers/ReduxProvider";
+import ThemeHydrator, { ThemeScript } from "@/components/theme/ThemeProvider";
+import PreferencesHydrator from "@/components/preferences/PreferencesHydrator";
 
 // Optimized font loading with next/font/google - Montserrat
 const montserrat = Montserrat({
@@ -53,14 +56,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body
-        className={`${montserrat.variable} antialiased flex flex-col min-h-screen bg-zinc-950 text-zinc-100 transition-colors duration-200`}
-      >
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
+      <body className={`${montserrat.variable} antialiased flex flex-col min-h-screen bg-zinc-950 text-zinc-100 transition-colors duration-200`}>
+        <ThemeScript />
+        <ReduxProvider>
+          <ThemeHydrator />
+          <PreferencesHydrator />
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </ReduxProvider>
       </body>
     </html>
   );

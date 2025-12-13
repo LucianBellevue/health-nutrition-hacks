@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { PostMetadata } from '@/lib/posts';
-import CategoryBadge from './CategoryBadge';
-import TagPill from './TagPill';
+import Image from "next/image";
+import { PostMetadata } from "@/lib/posts";
+import CategoryBadge from "./CategoryBadge";
+import TagPill from "./TagPill";
 
 interface PostCardProps {
   post: PostMetadata;
@@ -21,11 +22,14 @@ export default function PostCard({ post }: PostCardProps) {
     <article className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-md dark:hover:shadow-zinc-800/50 transition-shadow duration-200 overflow-hidden h-full flex flex-col">
       {post.image && (
         <Link href={`/blog/${post.slug}`} className="block">
-          <div className="aspect-video w-full overflow-hidden bg-zinc-100">
-            <img
+          <div className="aspect-video w-full overflow-hidden bg-zinc-100 relative">
+            <Image
               src={post.image}
               alt={post.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              fill
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-200"
+              priority={false}
             />
           </div>
         </Link>

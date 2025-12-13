@@ -1,52 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setPreference } from "@/store/slices/themeSlice";
 
-/**
- * Theme toggle button with sun/moon icons
- * Standalone component that manages theme without context
- */
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [mounted, setMounted] = useState(false);
+  const dispatch = useAppDispatch();
+  const { preference, resolved, initialized } = useAppSelector((state) => state.theme);
 
-  // Initialize and sync theme
-  useEffect(() => {
-    setMounted(true);
-    
-    // Get initial theme
-    const stored = localStorage.getItem('theme');
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const initialTheme = stored && stored !== 'system' ? (stored as 'light' | 'dark') : systemTheme;
-    
-    setTheme(initialTheme);
-  }, []);
+  const toggleTheme = useCallback(() => {
+    const nextPreference = resolved === "dark" ? "light" : "dark";
+    dispatch(setPreference(nextPreference));
+    localStorage.setItem("theme", nextPreference);
+  }, [dispatch, resolved]);
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
-
-  if (!mounted) {
-    return (
-      <div className="w-[40px] h-[40px] rounded-lg border border-zinc-300 dark:border-zinc-700" />
-    );
+  if (!initialized) {
+    return <div className="w-[40px] h-[40px] rounded-lg border border-zinc-300 dark:border-zinc-700" />;
   }
 
   return (
     <button
       onClick={toggleTheme}
       className="p-2 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      aria-label={`Switch to ${resolved === "dark" ? "light" : "dark"} mode`}
+      data-theme-preference={preference}
     >
-      {theme === 'dark' ? (
+      {resolved === "dark" ? (
         // Sun icon
         <svg
           className="w-5 h-5 text-zinc-700 dark:text-zinc-300"

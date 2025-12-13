@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface AffiliateBlockProps {
   title: string;
   description: string;
@@ -19,14 +21,16 @@ export default function AffiliateBlock({
 }: AffiliateBlockProps) {
   return (
     <div className="my-8 not-prose">
-      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-lg p-6 shadow-sm">
+      <div className="bg-linear-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-lg p-6 shadow-sm">
         <div className="flex items-start gap-4">
           {image && (
-            <div className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-white">
-              <img
+            <div className="shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-white relative">
+              <Image
                 src={image}
                 alt={title}
-                className="w-full h-full object-cover"
+                fill
+                sizes="96px"
+                className="object-cover"
               />
             </div>
           )}
