@@ -13,15 +13,36 @@ const montserrat = Montserrat({
   weight: ["300", "400", "500", "600", "700", "800"],
 });
 
+const OG_IMAGE = "/android-chrome-512x512.png";
+const SITE_URL = "https://www.healthnutritionhacks.com";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Health Nutrition Hacks – Evidence-Based Nutrition Tips & Healthy Recipes",
-  description: "Discover science-backed nutrition advice, healthy recipes, and wellness tips to optimize your health and well-being.",
+  description:
+    "Discover science-backed nutrition advice, healthy recipes, and wellness tips to optimize your health and well-being.",
   keywords: ["nutrition", "health", "wellness", "healthy recipes", "diet tips", "nutrition science"],
   authors: [{ name: "Health Nutrition Hacks Team" }],
   openGraph: {
-    title: "Health Nutrition Hacks",
-    description: "Evidence-based nutrition tips and healthy recipes",
+    title: "Health Nutrition Hacks – Evidence-Based Nutrition Tips & Healthy Recipes",
+    description: "Evidence-based nutrition tips, healthy recipes, and actionable wellness guidance.",
     type: "website",
+    url: "/",
+    siteName: "Health Nutrition Hacks",
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 512,
+        height: 512,
+        alt: "Health Nutrition Hacks logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Health Nutrition Hacks – Evidence-Based Nutrition Tips & Healthy Recipes",
+    description: "Evidence-based nutrition tips, healthy recipes, and actionable wellness guidance.",
+    images: [OG_IMAGE],
   },
 };
 

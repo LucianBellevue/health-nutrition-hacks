@@ -11,6 +11,7 @@ import CategoryBadge from '@/components/CategoryBadge';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import Image from 'next/image';
 
 // MDX components that can be used in posts
 const components = {
@@ -106,7 +107,7 @@ export default async function PostPage({ params }: Props) {
         <header className="mb-8">
           {metadata.image && (
             <div className="aspect-video w-full rounded-xl overflow-hidden mb-8 shadow-lg">
-              <img
+              <Image
                 src={metadata.image}
                 alt={metadata.title}
                 className="w-full h-full object-cover"

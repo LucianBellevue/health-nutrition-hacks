@@ -3,6 +3,7 @@ import { getAllPosts, getAllCategories } from '@/lib/posts';
 import BlogList from '@/components/BlogList';
 import Pagination from '@/components/Pagination';
 import NewsletterSignup from '@/components/NewsletterSignup';
+import Link from 'next/link';
 
 // Posts per page
 const POSTS_PER_PAGE = 9;
@@ -48,7 +49,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center py-12">
             <p className="text-zinc-600 text-lg">
-              Page not found. <a href="/blog" className="text-emerald-600 hover:underline">Return to page 1</a>
+              Page not found. <Link href="/blog" className="text-emerald-600 hover:underline">Return to page 1</Link>
             </p>
           </div>
         </div>

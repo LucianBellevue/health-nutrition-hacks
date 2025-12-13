@@ -18,6 +18,20 @@ export type Metric = {
 /**
  * Report Web Vitals to console (or your analytics service)
  */
+type WindowWithGtag = Window &
+  typeof globalThis & {
+    gtag?: (
+      command: "event",
+      action: string,
+      params: {
+        event_category: string;
+        value: number;
+        event_label: string;
+        non_interaction: boolean;
+      },
+    ) => void;
+  };
+
 export function reportWebVitals(metric: Metric) {
   // Log to console in development
   if (process.env.NODE_ENV === 'development') {
@@ -29,8 +43,9 @@ export function reportWebVitals(metric: Metric) {
   }
 
   // Example: Send to Google Analytics
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', metric.name, {
+  if (typeof window !== 'undefined') {
+    const win = window as WindowWithGtag;
+    win.gtag?.('event', metric.name, {
       event_category: 'Web Vitals',
       value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
       event_label: metric.id,

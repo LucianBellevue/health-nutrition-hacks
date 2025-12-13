@@ -1,6 +1,7 @@
-import { Metadata } from 'next';
-import Link from 'next/link';
-import { getAllCategories } from '@/lib/posts';
+import { Metadata } from "next";
+import Link from "next/link";
+import { getAllCategories, normalizeCategoryToSlug } from "@/lib/posts";
+import { CATEGORY_CATALOG } from "@/lib/categoryConfig";
 
 export const metadata: Metadata = {
   title: 'Categories – Health Nutrition Hacks',
@@ -11,18 +12,28 @@ export const metadata: Metadata = {
  * Categories index page - lists all categories
  */
 export default function CategoriesPage() {
-  const categories = getAllCategories();
+  const categoryCounts = getAllCategories();
+  const countsBySlug = new Map(categoryCounts.map((category) => [category.slug, category.count]));
+  const categories = CATEGORY_CATALOG.map((definition) => {
+    const slug = normalizeCategoryToSlug(definition.name);
+    return {
+      ...definition,
+      slug,
+      count: countsBySlug.get(slug) ?? 0,
+    };
+  });
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="min-h-screen bg-zinc-950 text-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900 mb-4">
+          <p className="text-sm uppercase tracking-[0.4em] text-emerald-400 mb-4">Categories</p>
+          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
             Browse by Category
           </h1>
-          <p className="text-lg text-zinc-600 max-w-2xl mx-auto">
-            Explore our nutrition and wellness content organized by topic.
+          <p className="text-lg text-zinc-300 max-w-2xl mx-auto">
+            Explore every topic we cover—each card shows how much content is waiting for you, even as new posts arrive.
           </p>
         </div>
 
@@ -34,17 +45,20 @@ export default function CategoriesPage() {
               href={`/categories/${category.slug}`}
               className="group"
             >
-              <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border border-zinc-100 p-6 h-full">
-                <div className="flex items-start justify-between mb-3">
-                  <h2 className="text-xl font-bold text-zinc-900 group-hover:text-emerald-600 transition-colors">
+              <div className="rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900/80 to-zinc-900/30 p-6 h-full shadow-[0_0_40px_rgba(6,182,212,0.08)] group-hover:border-emerald-500/60 transition-all duration-200">
+                <div className="flex items-start justify-between mb-4">
+                  <h2 className="text-2xl font-semibold text-emerald-300 group-hover:text-emerald-200 transition-colors">
                     {category.name}
                   </h2>
-                  <span className="shrink-0 ml-3 inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 text-sm font-semibold">
+                  <span className="shrink-0 ml-3 inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-300 text-base font-semibold">
                     {category.count}
                   </span>
                 </div>
-                <p className="text-zinc-600 text-sm">
-                  {category.count} {category.count === 1 ? 'post' : 'posts'} in this category
+                <p className="text-sm text-zinc-300 mb-4 leading-relaxed">
+                  {category.description}
+                </p>
+                <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">
+                  {category.count === 0 ? "Coming soon" : `${category.count} ${category.count === 1 ? "Post" : "Posts"}`}
                 </p>
               </div>
             </Link>
@@ -53,7 +67,7 @@ export default function CategoriesPage() {
 
         {categories.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-zinc-600 text-lg">No categories yet.</p>
+            <p className="text-zinc-500 text-lg">No categories yet.</p>
           </div>
         )}
       </div>
