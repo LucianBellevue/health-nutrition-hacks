@@ -35,8 +35,8 @@ export default function PostCard({ post }: PostCardProps) {
           </div>
         </Link>
       )}
-      <div className="p-6 flex flex-col flex-1">
-        <div className="flex items-center gap-3 text-sm mb-4">
+      <div className="p-4 sm:p-6 flex flex-col flex-1">
+        <div className="flex items-center gap-2 sm:gap-3 text-sm mb-3 sm:mb-4">
           {post.category && (
             <CategoryBadge
               name={post.category}

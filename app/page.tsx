@@ -43,10 +43,12 @@ export default function Home() {
   const recentPosts = getRecentPosts(3);
 
   return (
-    <div>
+    <div className="bg-linear-to-b from-emerald-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-cyan-950/30">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <section className="relative overflow-hidden">
+        <div aria-hidden="true" className="absolute inset-0 bg-linear-to-br from-emerald-50 via-teal-50/80 to-cyan-50/60 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-cyan-950/20" />
+        <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-white to-transparent dark:from-zinc-900" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
             <div className="text-left max-w-3xl">
               <span className="inline-flex items-center text-xs uppercase tracking-[0.4em] text-emerald-500 font-semibold mb-4">
@@ -115,8 +117,11 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-16 sm:py-20">
+        <div aria-hidden="true" className="absolute inset-0 bg-white dark:bg-zinc-900" />
+        <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-24 bg-linear-to-b from-teal-50/50 to-transparent dark:from-emerald-950/30" />
+        <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-zinc-50 to-transparent dark:from-zinc-800" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-100 mb-4">
               Why Health Nutrition Hacks Is a Trusted Wellness Resource
@@ -180,8 +185,11 @@ export default function Home() {
       </section>
 
       {/* Latest Posts Section */}
-      <section id="latest" className="py-16 sm:py-20 bg-white dark:bg-zinc-900">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="latest" className="relative py-16 sm:py-20">
+        <div aria-hidden="true" className="absolute inset-0 bg-zinc-50 dark:bg-zinc-800" />
+        <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-24 bg-linear-to-b from-white to-transparent dark:from-zinc-900" />
+        <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-white to-transparent dark:from-zinc-900" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-12">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
@@ -225,8 +233,11 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-16 sm:py-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="about" className="relative py-16 sm:py-20">
+        <div aria-hidden="true" className="absolute inset-0 bg-white dark:bg-zinc-900" />
+        <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-24 bg-linear-to-b from-zinc-50 to-transparent dark:from-zinc-800" />
+        <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-emerald-50/70 to-transparent dark:from-emerald-950/40" />
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
             <div>
               <p className="text-sm uppercase tracking-[0.4em] text-emerald-400 mb-4">About Health Nutrition Hacks</p>

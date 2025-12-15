@@ -16,13 +16,13 @@ export default function AuthorBox({ author }: AuthorBoxProps) {
     : ["Evidence-based", "Reader-friendly tips", "Trusted guidance"];
 
   return (
-    <section className="relative my-12">
+    <section className="relative my-8 sm:my-12">
       <div
         aria-hidden="true"
         className="absolute inset-0 rounded-3xl bg-linear-to-r from-emerald-500/20 via-teal-400/20 to-cyan-400/10 blur-3xl dark:opacity-70"
       />
 
-      <div className="relative flex flex-col gap-8 border border-zinc-200/70 dark:border-zinc-800/70 rounded-3xl bg-white/95 dark:bg-zinc-900/80 backdrop-blur-2xl p-6 md:p-10 shadow-[0_25px_80px_rgba(15,23,42,0.2)]">
+      <div className="relative flex flex-col gap-6 sm:gap-8 border border-zinc-200/70 dark:border-zinc-800/70 rounded-2xl sm:rounded-3xl bg-white/95 dark:bg-zinc-900/80 backdrop-blur-2xl p-5 sm:p-6 md:p-10 shadow-[0_25px_80px_rgba(15,23,42,0.2)]">
         <div className="flex flex-col gap-6 md:flex-row md:items-start items-center">
           {/* Avatar */}
           <div className="relative shrink-0">

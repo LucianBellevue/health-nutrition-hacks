@@ -75,12 +75,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   // If page number is out of bounds, show empty state
   if (currentPage > totalPages && totalPosts > 0) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-zinc-950">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center py-12">
-            <p className="text-zinc-600 text-lg">
+            <p className="text-zinc-400 text-lg">
               Page not found.{' '}
-              <Link href={`/categories/${categorySlug}`} className="text-emerald-600 hover:underline">
+              <Link href={`/categories/${categorySlug}`} className="text-emerald-400 hover:underline">
                 Return to page 1
               </Link>
             </p>
@@ -91,23 +91,23 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-zinc-950">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-zinc-600 mb-6">
-          <Link href="/categories" className="hover:text-emerald-600 transition-colors">
+        <nav className="flex items-center gap-2 text-sm text-zinc-400 mb-6">
+          <Link href="/categories" className="hover:text-emerald-400 transition-colors">
             Categories
           </Link>
           <span>/</span>
-          <span className="text-zinc-900 font-medium">{category.name}</span>
+          <span className="text-white font-medium">{category.name}</span>
         </nav>
 
         {/* Header Section */}
         <div className="mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900 mb-4">
+          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
             {category.name}
           </h1>
-          <p className="text-lg text-zinc-600">
+          <p className="text-lg text-zinc-300">
             {category.count} {category.count === 1 ? 'post' : 'posts'} in this category
           </p>
         </div>
@@ -129,8 +129,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             />
           </>
         ) : (
-          <div className="text-center py-12 bg-zinc-50 rounded-lg">
-            <p className="text-zinc-600 text-lg">No posts in this category yet.</p>
+          <div className="text-center py-12 bg-zinc-900 rounded-lg border border-zinc-800">
+            <p className="text-zinc-400 text-lg">No posts in this category yet.</p>
           </div>
         )}
       </div>

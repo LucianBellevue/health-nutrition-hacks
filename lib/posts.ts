@@ -148,3 +148,16 @@ export function getAllTags(): string[] {
 
   return Array.from(tagSet).sort();
 }
+
+/**
+ * Get a trending/recommended article (excludes current post)
+ * Returns the most recent post that isn't the current one
+ */
+export function getTrendingPost(excludeSlug?: string): Post | null {
+  const posts = getAllPosts();
+  const filtered = excludeSlug 
+    ? posts.filter((post) => post.metadata.slug !== excludeSlug)
+    : posts;
+  
+  return filtered.length > 0 ? filtered[0] : null;
+}

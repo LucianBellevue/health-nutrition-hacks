@@ -7,7 +7,7 @@ import SearchInput from './SearchInput';
 import CategoryFilter from './CategoryFilter';
 import EmptyState from './EmptyState';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setSearchQuery, setSelectedCategory, toggleFollowedCategory } from '@/store/slices/preferencesSlice';
+import { setSearchQuery, setSelectedCategory } from '@/store/slices/preferencesSlice';
 
 interface BlogListProps {
   posts: PostMetadata[];
@@ -19,7 +19,7 @@ interface BlogListProps {
  */
 export default function BlogList({ posts, categories }: BlogListProps) {
   const dispatch = useAppDispatch();
-  const { searchQuery, selectedCategory, followedCategories, initialized } = useAppSelector((state) => state.preferences);
+  const { searchQuery, selectedCategory, initialized } = useAppSelector((state) => state.preferences);
 
   // Filter posts based on search query and selected category
   const filteredPosts = useMemo(() => {
@@ -65,8 +65,6 @@ export default function BlogList({ posts, categories }: BlogListProps) {
           categories={categories}
           selectedCategorySlug={selectedCategory}
           onChange={(slug) => dispatch(setSelectedCategory(slug))}
-          followedCategories={followedCategories}
-          onToggleFollow={(slug) => dispatch(toggleFollowedCategory(slug))}
         />
       </div>
 

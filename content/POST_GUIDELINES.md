@@ -158,33 +158,46 @@ Use for quick-scan information at the top of posts:
 
 ## Product Cards
 
-### For Affiliate Links
+### Using the ProductCard Component
+
+Use the `ProductCard` component for affiliate product recommendations. It automatically fetches the product image from the link's Open Graph metadata.
 
 ```mdx
 <div className="not-prose grid gap-5 md:grid-cols-2">
-  <article className="rounded-3xl border border-zinc-100 bg-white/90 dark:bg-zinc-900/70 p-5 shadow-md">
-    <span className="block text-xs uppercase tracking-[0.3em] text-emerald-600 font-semibold mb-2">
-      Amazon pick
-    </span>
-    <h4 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-      Product Category/Use Case
-    </h4>
-    <a
-      href="{{AFFILIATE_PLACEHOLDER}}"
-      className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300 mt-2"
-    >
-      Product Name <span aria-hidden="true">↗</span>
-    </a>
-    <span className="block text-sm text-zinc-600 dark:text-zinc-300 mt-3">
-      Brief description of why this product is recommended.
-    </span>
-  </article>
+  <ProductCard
+    store="amazon"
+    title="Best for beginners"
+    productName="Product Name Here"
+    href="https://www.amazon.com/dp/PRODUCT_ID"
+    description="Brief description of why this product is recommended."
+  />
+  <ProductCard
+    store="iherb"
+    title="Budget-friendly option"
+    productName="Another Product Name"
+    href="https://www.iherb.com/pr/product-slug/12345"
+    description="Brief description of why this product is recommended."
+  />
 </div>
 ```
 
-**Color coding:**
-- Amazon picks: `text-emerald-600` / `text-emerald-700`
-- iHerb picks: `text-teal-600` / `text-teal-700`
+**Props:**
+
+| Prop | Required | Description |
+|------|----------|-------------|
+| `store` | Yes | `"amazon"` or `"iherb"` - sets badge color and CTA text |
+| `title` | Yes | Short category/use case title (e.g., "Best for beginners") |
+| `productName` | Yes | Full product name |
+| `href` | Yes | Affiliate link URL |
+| `description` | Yes | 1-2 sentence description |
+| `image` | No | Optional manual image URL (auto-fetched if omitted) |
+| `cta` | No | Custom CTA text (defaults to "View on Amazon/iHerb") |
+
+**Features:**
+- Auto-fetches product image from link's OG metadata
+- Styled CTA button with hover effects
+- Amazon = emerald green styling
+- iHerb = teal styling
 
 ---
 

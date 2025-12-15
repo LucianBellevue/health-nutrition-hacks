@@ -75,15 +75,15 @@ export default function NewsletterSignup({
         className="absolute inset-0 rounded-[32px] bg-linear-to-r from-emerald-500/25 via-teal-400/20 to-cyan-400/15 blur-3xl"
       />
 
-      <div className="relative max-w-2xl mx-auto rounded-[32px] border border-emerald-100/80 dark:border-emerald-900/50 bg-white/95 dark:bg-zinc-900/90 backdrop-blur-xl p-8 sm:p-10 shadow-[0_30px_70px_rgba(16,185,129,0.18)]">
+      <div className="relative max-w-2xl mx-auto rounded-[24px] sm:rounded-[32px] border border-emerald-100/80 dark:border-emerald-900/50 bg-white/95 dark:bg-zinc-900/90 backdrop-blur-xl p-6 sm:p-10 shadow-[0_30px_70px_rgba(16,185,129,0.18)]">
         <div className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-emerald-600 mb-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] sm:tracking-[0.4em] text-emerald-600 mb-2 sm:mb-3">
             Stay in the loop
           </p>
-          <h3 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-3">
+          <h3 className="text-xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2 sm:mb-3">
             {title}
           </h3>
-          <p className="text-zinc-600 dark:text-zinc-400 mb-8 leading-relaxed max-w-lg mx-auto">
+          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 mb-6 sm:mb-8 leading-relaxed max-w-lg mx-auto">
             {description}
           </p>
 

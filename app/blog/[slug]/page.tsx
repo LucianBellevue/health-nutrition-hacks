@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
-import { getPostBySlug, getPostSlugs } from '@/lib/posts';
+import { getPostBySlug, getPostSlugs, getTrendingPost } from '@/lib/posts';
 import { getAuthorByIdOrDefault } from '@/lib/authors';
 import Prose from '@/components/Prose';
 import AffiliateBlock from '@/components/AffiliateBlock';
@@ -13,11 +13,15 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import Image from 'next/image';
 import PostImage from '@/components/PostImage';
+import ProductCard from '@/components/ProductCard';
+import BackButton from '@/components/BackButton';
+import TrendingArticle from '@/components/TrendingArticle';
 
 // MDX components that can be used in posts
 const components = {
   AffiliateBlock,
   PostImage,
+  ProductCard,
 };
 
 // MDX options
@@ -96,6 +100,9 @@ export default async function PostPage({ params }: Props) {
   // Get author information
   const author = getAuthorByIdOrDefault(metadata.authorId);
 
+  // Get trending post (excluding current post)
+  const trendingPost = getTrendingPost(metadata.slug);
+
   const formattedDate = new Date(metadata.date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -104,7 +111,12 @@ export default async function PostPage({ params }: Props) {
 
   return (
     <article className="min-h-screen bg-white dark:bg-zinc-950">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {/* Back Button */}
+        <div className="mb-6">
+          <BackButton />
+        </div>
+
         {/* Article Header */}
         <header className="mb-8">
           {metadata.image && (
@@ -139,11 +151,11 @@ export default async function PostPage({ params }: Props) {
             )}
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 leading-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-3 sm:mb-4 leading-tight">
             {metadata.title}
           </h1>
 
-          <p className="text-xl text-zinc-700 dark:text-zinc-300 leading-relaxed">
+          <p className="text-base sm:text-xl text-zinc-700 dark:text-zinc-300 leading-relaxed">
             {metadata.description}
           </p>
 
@@ -173,16 +185,19 @@ export default async function PostPage({ params }: Props) {
         <AuthorBox author={author} />
 
         {/* Newsletter Signup */}
-        <div className="my-12">
+        <div className="my-8 sm:my-12">
           <NewsletterSignup 
             title="Enjoyed this article?"
             description="Get more evidence-based nutrition tips, healthy recipes, and wellness advice delivered to your inbox every week."
           />
         </div>
 
+        {/* Trending Article */}
+        {trendingPost && <TrendingArticle post={trendingPost.metadata} />}
+
         {/* Article Footer */}
-        <footer className="mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-800">
-          <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-lg p-6 border border-emerald-100 dark:border-emerald-900">
+        <footer className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-lg p-4 sm:p-6 border border-emerald-100 dark:border-emerald-900">
             <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
               <strong>Disclaimer:</strong> The information provided in this article is for educational purposes only and should not be considered medical advice. Always consult with a qualified healthcare professional before making any changes to your diet or health routine.
             </p>
