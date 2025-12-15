@@ -4,8 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
  * Newsletter subscription API endpoint
  * POST /api/newsletter
  * 
- * Currently logs to console - replace with actual email service integration
- * (e.g., Resend, MailerLite, Brevo, ConvertKit, etc.)
+ * Integrates with MailerLite to capture email subscribers
  */
 export async function POST(request: NextRequest) {
   try {
@@ -29,47 +28,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // =============================================================
-    // TODO: Replace this section with your email service integration
-    // =============================================================
-    
-    // For now, just log to console
-    console.log('📧 Newsletter subscription:', email);
-    console.log('Timestamp:', new Date().toISOString());
+    // MailerLite API integration
+    const MAILERLITE_API_KEY = process.env.MAILERLITE_API_KEY;
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    if (!MAILERLITE_API_KEY) {
+      console.error('MailerLite API key not configured');
+      return NextResponse.json(
+        { success: false, error: 'Newsletter service not configured' },
+        { status: 500 }
+      );
+    }
 
-    // =============================================================
-    // Example integration patterns:
-    // =============================================================
-    
-    // RESEND:
-    // const resend = new Resend(process.env.RESEND_API_KEY);
-    // await resend.contacts.create({
-    //   email,
-    //   audienceId: process.env.RESEND_AUDIENCE_ID,
-    // });
+    const response = await fetch('https://connect.mailerlite.com/api/subscribers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${MAILERLITE_API_KEY}`,
+      },
+      body: JSON.stringify({
+        email,
+      }),
+    });
 
-    // MAILERLITE:
-    // const response = await fetch('https://api.mailerlite.com/api/v2/subscribers', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'X-MailerLite-ApiKey': process.env.MAILERLITE_API_KEY,
-    //   },
-    //   body: JSON.stringify({ email }),
-    // });
+    const data = await response.json();
 
-    // BREVO (Sendinblue):
-    // const response = await fetch('https://api.brevo.com/v3/contacts', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'api-key': process.env.BREVO_API_KEY,
-    //   },
-    //   body: JSON.stringify({ email, listIds: [2] }),
-    // });
+    if (!response.ok) {
+      // Handle specific MailerLite errors
+      if (response.status === 422 && data.message?.includes('already exists')) {
+        return NextResponse.json(
+          { success: true, message: 'You are already subscribed!' },
+          { status: 200 }
+        );
+      }
+
+      console.error('MailerLite error:', data);
+      return NextResponse.json(
+        { success: false, error: data.message || 'Failed to subscribe' },
+        { status: response.status }
+      );
+    }
+
+    console.log('📧 New subscriber added:', email);
 
     return NextResponse.json(
       { 

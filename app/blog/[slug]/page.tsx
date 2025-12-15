@@ -16,12 +16,14 @@ import PostImage from '@/components/PostImage';
 import ProductCard from '@/components/ProductCard';
 import BackButton from '@/components/BackButton';
 import TrendingArticle from '@/components/TrendingArticle';
+import NewsletterCTA from '@/components/NewsletterCTA';
 
 // MDX components that can be used in posts
 const components = {
   AffiliateBlock,
   PostImage,
   ProductCard,
+  NewsletterCTA,
 };
 
 // MDX options

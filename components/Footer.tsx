@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import FooterNewsletter from './FooterNewsletter';
 
 /**
  * Site footer with copyright and links
@@ -16,8 +17,8 @@ export default function Footer() {
       />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-        {/* Top section with branding + newsletter teaser */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 sm:gap-8 mb-8 sm:mb-12">
+        {/* Top section with branding + newsletter */}
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 mb-8 sm:mb-12">
           <div className="max-w-md">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-2xl bg-zinc-900 dark:bg-white/10 flex items-center justify-center shadow-lg">
@@ -33,27 +34,28 @@ export default function Footer() {
                 Health Nutrition Hacks
               </span>
             </div>
-            <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
+            <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-4">
               Evidence-based nutrition tips, healthy recipes, and wellness advice you can actually stick with.
             </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/blog"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-3 text-sm font-semibold shadow-lg transition hover:-translate-y-0.5"
+              >
+                Read the blog
+                <span aria-hidden="true">→</span>
+              </Link>
+              <a
+                href="/rss.xml"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-800/60 backdrop-blur px-5 py-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200 transition hover:border-emerald-300"
+              >
+                RSS Feed
+              </a>
+            </div>
           </div>
 
-          {/* Mini newsletter CTA */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link
-              href="/blog"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-3 text-sm font-semibold shadow-lg transition hover:-translate-y-0.5"
-            >
-              Read the blog
-              <span aria-hidden="true">→</span>
-            </Link>
-            <a
-              href="/rss.xml"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-800/60 backdrop-blur px-5 py-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200 transition hover:border-emerald-300"
-            >
-              RSS Feed
-            </a>
-          </div>
+          {/* Newsletter signup */}
+          <FooterNewsletter />
         </div>
 
         {/* Link columns */}

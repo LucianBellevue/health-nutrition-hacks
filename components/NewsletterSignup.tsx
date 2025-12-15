@@ -8,9 +8,11 @@ import {
   submitSuccess,
   submitError,
   resetStatus,
+  NewsletterFormId,
 } from '@/store/slices/newsletterSlice';
 
 interface NewsletterSignupProps {
+  formId?: NewsletterFormId;
   title?: string;
   description?: string;
 }
@@ -19,11 +21,12 @@ interface NewsletterSignupProps {
  * Newsletter signup component with email validation and API integration
  */
 export default function NewsletterSignup({
+  formId = 'inline',
   title = 'Get Weekly Nutrition Hacks',
   description = 'Join thousands of readers who receive evidence-based nutrition tips, healthy recipes, and exclusive content delivered straight to their inbox every week.',
 }: NewsletterSignupProps) {
   const dispatch = useAppDispatch();
-  const { email, status, errorMessage } = useAppSelector((state) => state.newsletter);
+  const { email, status, errorMessage } = useAppSelector((state) => state.newsletter.forms[formId]);
 
   const validateEmail = (value: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,16 +38,16 @@ export default function NewsletterSignup({
 
     // Validation
     if (!email.trim()) {
-      dispatch(submitError('Please enter your email address'));
+      dispatch(submitError({ formId, error: 'Please enter your email address' }));
       return;
     }
 
     if (!validateEmail(email)) {
-      dispatch(submitError('Please enter a valid email address'));
+      dispatch(submitError({ formId, error: 'Please enter a valid email address' }));
       return;
     }
 
-    dispatch(submitStart());
+    dispatch(submitStart(formId));
 
     try {
       const response = await fetch('/api/newsletter', {
@@ -58,12 +61,12 @@ export default function NewsletterSignup({
       const data = await response.json();
 
       if (response.ok && data.success) {
-        dispatch(submitSuccess());
+        dispatch(submitSuccess(formId));
       } else {
-        dispatch(submitError(data.error || 'Something went wrong. Please try again.'));
+        dispatch(submitError({ formId, error: data.error || 'Something went wrong. Please try again.' }));
       }
     } catch {
-      dispatch(submitError('Failed to subscribe. Please try again later.'));
+      dispatch(submitError({ formId, error: 'Failed to subscribe. Please try again later.' }));
     }
   };
 
@@ -114,7 +117,7 @@ export default function NewsletterSignup({
               </p>
               <button
                 type="button"
-                onClick={() => dispatch(resetStatus())}
+                onClick={() => dispatch(resetStatus(formId))}
                 className="mt-5 inline-flex items-center justify-center px-5 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-300 transition-colors"
               >
                 Subscribe another email &rarr;
@@ -126,7 +129,7 @@ export default function NewsletterSignup({
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => dispatch(setEmail(e.target.value))}
+                  onChange={(e) => dispatch(setEmail({ formId, email: e.target.value }))}
                   placeholder="Enter your email address"
                   disabled={status === 'loading'}
                   className="w-full px-5 py-4 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 focus:border-emerald-500 dark:focus:border-emerald-400 outline-none transition-shadow placeholder:text-zinc-400"

@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import ReduxProvider from "@/components/providers/ReduxProvider";
 import ThemeHydrator, { ThemeScript } from "@/components/theme/ThemeProvider";
 import PreferencesHydrator from "@/components/preferences/PreferencesHydrator";
+import NewsletterPopup from "@/components/NewsletterPopup";
 
 // Optimized font loading with next/font/google - Montserrat
 const montserrat = Montserrat({
@@ -64,6 +65,7 @@ export default function RootLayout({
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <NewsletterPopup />
         </ReduxProvider>
       </body>
     </html>
