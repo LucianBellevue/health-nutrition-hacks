@@ -165,7 +165,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="https://www.pinterest.com/healthnutritionhacks"
+                href="https://pin.it/2EPwRmoKE"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-zinc-500 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
