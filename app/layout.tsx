@@ -49,6 +49,9 @@ export const metadata: Metadata = {
     description: "Evidence-based nutrition tips, healthy recipes, and actionable wellness guidance.",
     images: [OG_IMAGE],
   },
+  other: {
+    "google-adsense-account": "ca-pub-6330166847282337",
+  },
 };
 
 export default function RootLayout({
