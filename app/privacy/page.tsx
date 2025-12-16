@@ -63,6 +63,9 @@ const sections = [
   },
 ];
 
+const SITE_URL = "https://www.healthnutritionhacks.com";
+const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
+
 export const metadata: Metadata = {
   title: "Privacy Policy | Health Nutrition Hacks",
   description:
@@ -74,7 +77,24 @@ export const metadata: Metadata = {
     title: "Privacy Policy | Health Nutrition Hacks",
     description:
       "Understand how we handle personal data, cookies, and analytics across the Health Nutrition Hacks platform.",
-    url: "https://www.healthnutritionhacks.com/privacy",
+    url: `${SITE_URL}/privacy`,
+    siteName: "Health Nutrition Hacks",
+    type: "website",
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 512,
+        height: 512,
+        alt: "Health Nutrition Hacks",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Privacy Policy | Health Nutrition Hacks",
+    description:
+      "Understand how we handle personal data, cookies, and analytics across the Health Nutrition Hacks platform.",
+    images: [OG_IMAGE],
   },
 };
 

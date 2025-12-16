@@ -54,6 +54,9 @@ const sections = [
   },
 ];
 
+const SITE_URL = "https://www.healthnutritionhacks.com";
+const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
+
 export const metadata: Metadata = {
   title: "Medical & Nutrition Disclaimer | Health Nutrition Hacks",
   description:
@@ -65,7 +68,24 @@ export const metadata: Metadata = {
     title: "Medical & Nutrition Disclaimer | Health Nutrition Hacks",
     description:
       "Read the medical and nutrition disclaimer that clarifies the educational purpose of Health Nutrition Hacks.",
-    url: "https://www.healthnutritionhacks.com/disclaimer",
+    url: `${SITE_URL}/disclaimer`,
+    siteName: "Health Nutrition Hacks",
+    type: "website",
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 512,
+        height: 512,
+        alt: "Health Nutrition Hacks",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Medical & Nutrition Disclaimer | Health Nutrition Hacks",
+    description:
+      "Read the medical and nutrition disclaimer that clarifies the educational purpose of Health Nutrition Hacks.",
+    images: [OG_IMAGE],
   },
 };
 

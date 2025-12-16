@@ -68,6 +68,9 @@ const sections = [
   },
 ];
 
+const SITE_URL = "https://www.healthnutritionhacks.com";
+const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
+
 export const metadata: Metadata = {
   title: "Terms of Service | Health Nutrition Hacks",
   description:
@@ -79,7 +82,24 @@ export const metadata: Metadata = {
     title: "Terms of Service | Health Nutrition Hacks",
     description:
       "Learn the rules that guide how you may access, share, and engage with Health Nutrition Hacks content and services.",
-    url: "https://www.healthnutritionhacks.com/terms",
+    url: `${SITE_URL}/terms`,
+    siteName: "Health Nutrition Hacks",
+    type: "website",
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 512,
+        height: 512,
+        alt: "Health Nutrition Hacks",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms of Service | Health Nutrition Hacks",
+    description:
+      "Learn the rules that guide how you may access, share, and engage with Health Nutrition Hacks content and services.",
+    images: [OG_IMAGE],
   },
 };
 

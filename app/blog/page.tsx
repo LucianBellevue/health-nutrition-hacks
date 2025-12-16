@@ -8,12 +8,31 @@ import Link from 'next/link';
 // Posts per page
 const POSTS_PER_PAGE = 9;
 
+const SITE_URL = 'https://www.healthnutritionhacks.com';
+
 export const metadata: Metadata = {
   title: 'Nutrition Blog – Health Nutrition Hacks',
   description: 'Discover evidence-based nutrition tips, healthy recipes, and wellness advice from our expert team.',
   openGraph: {
     title: 'Nutrition Blog – Health Nutrition Hacks',
     description: 'Discover evidence-based nutrition tips, healthy recipes, and wellness advice from our expert team.',
+    type: 'website',
+    url: `${SITE_URL}/blog`,
+    siteName: 'Health Nutrition Hacks',
+    images: [
+      {
+        url: `${SITE_URL}/android-chrome-512x512.png`,
+        width: 512,
+        height: 512,
+        alt: 'Health Nutrition Hacks',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nutrition Blog – Health Nutrition Hacks',
+    description: 'Discover evidence-based nutrition tips, healthy recipes, and wellness advice from our expert team.',
+    images: [`${SITE_URL}/android-chrome-512x512.png`],
   },
 };
 

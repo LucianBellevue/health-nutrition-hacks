@@ -48,6 +48,8 @@ export async function generateStaticParams() {
   }));
 }
 
+const SITE_URL = 'https://www.healthnutritionhacks.com';
+
 /**
  * Generate metadata for SEO
  */
@@ -58,7 +60,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const post = getPostBySlug(slug);
     const { metadata } = post;
 
+    // Build absolute URL for the image
+    const imageUrl = metadata.image 
+      ? `${SITE_URL}${metadata.image.startsWith('/') ? '' : '/'}${metadata.image}`
+      : `${SITE_URL}/android-chrome-512x512.png`;
+
     return {
+      metadataBase: new URL(SITE_URL),
       title: `${metadata.title} – Health Nutrition Hacks`,
       description: metadata.description,
       authors: metadata.author ? [{ name: metadata.author }] : undefined,
@@ -66,15 +74,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: metadata.title,
         description: metadata.description,
         type: 'article',
+        url: `${SITE_URL}/blog/${slug}`,
+        siteName: 'Health Nutrition Hacks',
         publishedTime: metadata.date,
         authors: metadata.author ? [metadata.author] : undefined,
-        images: metadata.image ? [metadata.image] : undefined,
+        images: [
+          {
+            url: imageUrl,
+            width: 1200,
+            height: 630,
+            alt: metadata.title,
+          },
+        ],
       },
       twitter: {
         card: 'summary_large_image',
         title: metadata.title,
         description: metadata.description,
-        images: metadata.image ? [metadata.image] : undefined,
+        images: [
+          {
+            url: imageUrl,
+            width: 1200,
+            height: 630,
+            alt: metadata.title,
+          },
+        ],
       },
     };
   } catch {

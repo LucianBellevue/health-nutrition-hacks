@@ -3,6 +3,9 @@ import Link from "next/link";
 import { getRecentPosts } from "@/lib/posts";
 import PostCard from "@/components/PostCard";
 
+const SITE_URL = "https://www.healthnutritionhacks.com";
+const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
+
 export const metadata: Metadata = {
   title: "Health Nutrition Hacks | Evidence-Based Wellness Tips & Meal Prep Guides",
   description:
@@ -15,13 +18,30 @@ export const metadata: Metadata = {
     "functional nutrition blog",
   ],
   alternates: {
-    canonical: "https://www.healthnutritionhacks.com/",
+    canonical: SITE_URL,
   },
   openGraph: {
     title: "Health Nutrition Hacks | Evidence-Based Wellness Tips & Meal Prep Guides",
     description:
       "Discover research-backed nutrition guidance, sustainable meal prep routines, and realistic wellness strategies tailored for busy, health-minded people.",
-    url: "https://www.healthnutritionhacks.com/",
+    url: SITE_URL,
+    siteName: "Health Nutrition Hacks",
+    type: "website",
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 512,
+        height: 512,
+        alt: "Health Nutrition Hacks",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Health Nutrition Hacks | Evidence-Based Wellness Tips & Meal Prep Guides",
+    description:
+      "Discover research-backed nutrition guidance, sustainable meal prep routines, and realistic wellness strategies tailored for busy, health-minded people.",
+    images: [OG_IMAGE],
   },
 };
 

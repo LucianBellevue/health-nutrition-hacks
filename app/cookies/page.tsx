@@ -1,9 +1,33 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 
+const SITE_URL = 'https://www.healthnutritionhacks.com';
+const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
+
 export const metadata: Metadata = {
   title: 'Cookie Policy – Health Nutrition Hacks',
   description: 'Learn how Health Nutrition Hacks uses cookies and similar technologies to improve your browsing experience.',
+  openGraph: {
+    title: 'Cookie Policy – Health Nutrition Hacks',
+    description: 'Learn how Health Nutrition Hacks uses cookies and similar technologies to improve your browsing experience.',
+    url: `${SITE_URL}/cookies`,
+    siteName: 'Health Nutrition Hacks',
+    type: 'website',
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 512,
+        height: 512,
+        alt: 'Health Nutrition Hacks',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Cookie Policy – Health Nutrition Hacks',
+    description: 'Learn how Health Nutrition Hacks uses cookies and similar technologies to improve your browsing experience.',
+    images: [OG_IMAGE],
+  },
 };
 
 export default function CookiePolicyPage() {

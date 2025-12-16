@@ -8,6 +8,9 @@ import Link from 'next/link';
 // Posts per page for category pages
 const POSTS_PER_PAGE = 9;
 
+const SITE_URL = 'https://www.healthnutritionhacks.com';
+const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
+
 interface Props {
   params: Promise<{ category: string }>;
   searchParams: Promise<{ page?: string }>;
@@ -41,7 +44,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: `Browse all ${category.name.toLowerCase()} posts. ${category.count} articles about ${category.name.toLowerCase()}.`,
     openGraph: {
       title: `${category.name} – Health Nutrition Hacks`,
-      description: `Browse all ${category.name.toLowerCase()} posts.`,
+      description: `Browse all ${category.name.toLowerCase()} posts. ${category.count} articles about ${category.name.toLowerCase()}.`,
+      url: `${SITE_URL}/categories/${categorySlug}`,
+      siteName: 'Health Nutrition Hacks',
+      type: 'website',
+      images: [
+        {
+          url: OG_IMAGE,
+          width: 512,
+          height: 512,
+          alt: 'Health Nutrition Hacks',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary',
+      title: `${category.name} – Health Nutrition Hacks`,
+      description: `Browse all ${category.name.toLowerCase()} posts. ${category.count} articles about ${category.name.toLowerCase()}.`,
+      images: [OG_IMAGE],
     },
   };
 }

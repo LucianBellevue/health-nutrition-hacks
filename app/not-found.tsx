@@ -1,4 +1,34 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
+
+const SITE_URL = 'https://www.healthnutritionhacks.com';
+const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
+
+export const metadata: Metadata = {
+  title: 'Page Not Found – Health Nutrition Hacks',
+  description: 'The page you are looking for does not exist or has been moved.',
+  openGraph: {
+    title: 'Page Not Found – Health Nutrition Hacks',
+    description: 'The page you are looking for does not exist or has been moved.',
+    url: SITE_URL,
+    siteName: 'Health Nutrition Hacks',
+    type: 'website',
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 512,
+        height: 512,
+        alt: 'Health Nutrition Hacks',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Page Not Found – Health Nutrition Hacks',
+    description: 'The page you are looking for does not exist or has been moved.',
+    images: [OG_IMAGE],
+  },
+};
 
 export default function NotFound() {
   return (

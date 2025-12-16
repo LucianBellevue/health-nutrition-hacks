@@ -3,9 +3,33 @@ import Link from "next/link";
 import { getAllCategories, normalizeCategoryToSlug } from "@/lib/posts";
 import { CATEGORY_CATALOG } from "@/lib/categoryConfig";
 
+const SITE_URL = 'https://www.healthnutritionhacks.com';
+const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
+
 export const metadata: Metadata = {
   title: 'Categories – Health Nutrition Hacks',
   description: 'Browse all categories of nutrition and health topics.',
+  openGraph: {
+    title: 'Categories – Health Nutrition Hacks',
+    description: 'Browse all categories of nutrition and health topics.',
+    url: `${SITE_URL}/categories`,
+    siteName: 'Health Nutrition Hacks',
+    type: 'website',
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 512,
+        height: 512,
+        alt: 'Health Nutrition Hacks',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Categories – Health Nutrition Hacks',
+    description: 'Browse all categories of nutrition and health topics.',
+    images: [OG_IMAGE],
+  },
 };
 
 /**
