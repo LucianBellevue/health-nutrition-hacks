@@ -39,6 +39,8 @@ const nextConfig: NextConfig = {
       "rehype-slug",
       "rehype-autolink-headings",
     ],
+    // Inline critical CSS to reduce render-blocking
+    optimizeCss: true,
   },
   // Cache headers for static assets
   async headers() {

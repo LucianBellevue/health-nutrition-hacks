@@ -69,11 +69,16 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
-        {/* Preconnect to external origins for faster resource loading */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Inline critical CSS to eliminate render-blocking chain */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          :root{--background:#ecfdf5;--foreground:#18181b}
+          .dark{--background:#09090b;--foreground:#fafafa}
+          body{background:var(--background);color:var(--foreground)}
+        `}} />
+        {/* Preconnect to AdSense */}
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+        {/* AdSense script deferred to not block rendering */}
         <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6330166847282337"
           crossOrigin="anonymous"
