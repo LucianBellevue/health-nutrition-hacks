@@ -120,19 +120,43 @@ export default function NewsletterPopup() {
     return () => clearTimeout(timer);
   }, [showPopup]);
 
-  // Scroll-based trigger
+  // Scroll-based trigger with debouncing to prevent forced reflows
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrolled = window.scrollY / scrollHeight;
+    let ticking = false;
+    let cachedScrollHeight = 0;
 
-      if (scrolled >= SCROLL_THRESHOLD) {
-        showPopup();
-      }
+    const updateScrollHeight = () => {
+      cachedScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
     };
 
+    const handleScroll = () => {
+      if (ticking) return;
+      
+      ticking = true;
+      requestAnimationFrame(() => {
+        // Use cached scrollHeight, only recalculate occasionally
+        if (cachedScrollHeight === 0) {
+          updateScrollHeight();
+        }
+        
+        const scrolled = window.scrollY / cachedScrollHeight;
+        if (scrolled >= SCROLL_THRESHOLD) {
+          showPopup();
+        }
+        ticking = false;
+      });
+    };
+
+    // Calculate initial scrollHeight after layout is stable
+    requestAnimationFrame(updateScrollHeight);
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('resize', updateScrollHeight, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', updateScrollHeight);
+    };
   }, [showPopup]);
 
   // Exit intent trigger (desktop only)

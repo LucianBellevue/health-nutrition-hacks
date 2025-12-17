@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 declare global {
   interface Window {
@@ -9,12 +9,20 @@ declare global {
 }
 
 export default function AdSenseInArticle() {
+  const initialized = useRef(false);
+
   useEffect(() => {
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (err) {
-      console.error('AdSense error:', err);
-    }
+    // Prevent duplicate initialization and use rAF to avoid forced reflow
+    if (initialized.current) return;
+    initialized.current = true;
+
+    requestAnimationFrame(() => {
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (err) {
+        console.error('AdSense error:', err);
+      }
+    });
   }, []);
 
   return (
