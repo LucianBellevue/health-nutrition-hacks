@@ -162,6 +162,7 @@ export default async function PostPage({ params }: Props) {
                 width={1200}
                 height={630}
                 priority
+                fetchPriority="high"
                 sizes="(min-width: 1024px) 896px, 100vw"
               />
             </div>

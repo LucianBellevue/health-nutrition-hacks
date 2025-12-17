@@ -57,8 +57,9 @@ export default function PostImage({
           sizes="(min-width: 1024px) 896px, 100vw"
           className="object-cover"
           priority={priority}
+          fetchPriority={priority ? "high" : "auto"}
           loading={priority ? "eager" : "lazy"}
-          decoding="async"
+          decoding={priority ? "sync" : "async"}
         />
         {style.overlay && <div className={style.overlay} />}
       </div>
