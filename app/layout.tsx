@@ -11,12 +11,14 @@ import NewsletterPopup from "@/components/NewsletterPopup";
 import CookieConsent from "@/components/CookieConsent";
 
 // Optimized font loading with next/font/google - Montserrat
+// Reduced weight variants to only those actually used for smaller font file
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
   display: "swap", // Prevents FOIT (Flash of Invisible Text)
   preload: true,
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"], // Removed 300, 800 - rarely used
+  fallback: ["system-ui", "-apple-system", "sans-serif"],
 });
 
 const OG_IMAGE = "/android-chrome-512x512.png";
@@ -63,6 +65,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        {/* Preconnect to external origins for faster resource loading */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6330166847282337"
           crossOrigin="anonymous"

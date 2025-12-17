@@ -29,7 +29,8 @@ export default function PostCard({ post }: PostCardProps) {
               fill
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
               className="object-cover group-hover:scale-105 transition-transform duration-500"
-              priority={false}
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
