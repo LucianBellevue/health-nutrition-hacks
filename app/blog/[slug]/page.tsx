@@ -17,6 +17,8 @@ import ProductCard from '@/components/ProductCard';
 import BackButton from '@/components/BackButton';
 import TrendingArticle from '@/components/TrendingArticle';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import AdSenseInFeed from '@/components/AdSenseInFeed';
+import AdSenseInArticle from '@/components/AdSenseInArticle';
 
 // MDX components that can be used in posts
 const components = {
@@ -24,6 +26,7 @@ const components = {
   PostImage,
   ProductCard,
   NewsletterCTA,
+  AdSenseInArticle,
 };
 
 // MDX options
@@ -220,6 +223,9 @@ export default async function PostPage({ params }: Props) {
 
         {/* Trending Article */}
         {trendingPost && <TrendingArticle post={trendingPost.metadata} />}
+
+        {/* In-Feed Ad */}
+        <AdSenseInFeed />
 
         {/* Article Footer */}
         <footer className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-zinc-200 dark:border-zinc-800">

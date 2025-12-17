@@ -4,6 +4,7 @@ import BlogList from '@/components/BlogList';
 import Pagination from '@/components/Pagination';
 import NewsletterSignup from '@/components/NewsletterSignup';
 import Link from 'next/link';
+import AdSenseMultiplex from '@/components/AdSenseMultiplex';
 
 // Posts per page
 const POSTS_PER_PAGE = 9;
@@ -102,6 +103,9 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         ) : (
           <>
             <BlogList posts={postsMetadata} categories={categories} />
+            
+            {/* Multiplex Ad */}
+            <AdSenseMultiplex />
             
             {/* Pagination */}
             <Pagination
