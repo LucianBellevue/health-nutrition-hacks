@@ -17,6 +17,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Performance optimizations
+  compiler: {
+    // Remove console.log in production
+    removeConsole: process.env.NODE_ENV === "production",
+  },
+  experimental: {
+    // Optimize package imports for smaller bundles
+    optimizePackageImports: ["@reduxjs/toolkit", "react-redux"],
+  },
 };
 
 export default nextConfig;
