@@ -30,8 +30,15 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   experimental: {
-    // Optimize package imports for smaller bundles
-    optimizePackageImports: ["@reduxjs/toolkit", "react-redux"],
+    // Optimize package imports for smaller bundles and better tree-shaking
+    optimizePackageImports: [
+      "@reduxjs/toolkit",
+      "react-redux",
+      "next-mdx-remote",
+      "remark-gfm",
+      "rehype-slug",
+      "rehype-autolink-headings",
+    ],
   },
   // Cache headers for static assets
   async headers() {

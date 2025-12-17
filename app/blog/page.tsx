@@ -1,10 +1,15 @@
 import { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import { getAllPosts, getAllCategories } from '@/lib/posts';
 import BlogList from '@/components/BlogList';
 import Pagination from '@/components/Pagination';
-import NewsletterSignup from '@/components/NewsletterSignup';
 import Link from 'next/link';
-import AdSenseMultiplex from '@/components/AdSenseMultiplex';
+
+// Dynamic imports for non-critical components to reduce initial JS bundle
+const NewsletterSignup = dynamic(() => import('@/components/NewsletterSignup'), {
+  loading: () => <div className="h-32 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />,
+});
+const AdSenseMultiplex = dynamic(() => import('@/components/AdSenseMultiplex'));
 
 // Posts per page
 const POSTS_PER_PAGE = 9;

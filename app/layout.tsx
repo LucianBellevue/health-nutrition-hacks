@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import dynamic from "next/dynamic";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
@@ -7,8 +8,11 @@ import Footer from "@/components/Footer";
 import ReduxProvider from "@/components/providers/ReduxProvider";
 import ThemeHydrator, { ThemeScript } from "@/components/theme/ThemeProvider";
 import PreferencesHydrator from "@/components/preferences/PreferencesHydrator";
-import NewsletterPopup from "@/components/NewsletterPopup";
-import CookieConsent from "@/components/CookieConsent";
+
+// Dynamic imports for non-critical components to reduce initial JS bundle
+// These components are code-split and loaded separately from the main bundle
+const NewsletterPopup = dynamic(() => import("@/components/NewsletterPopup"));
+const CookieConsent = dynamic(() => import("@/components/CookieConsent"));
 
 // Optimized font loading with next/font/google - Montserrat
 // Reduced weight variants to only those actually used for smaller font file

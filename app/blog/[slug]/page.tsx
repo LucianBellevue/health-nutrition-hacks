@@ -1,12 +1,12 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getPostBySlug, getPostSlugs, getTrendingPost } from '@/lib/posts';
 import { getAuthorByIdOrDefault } from '@/lib/authors';
 import Prose from '@/components/Prose';
 import AffiliateBlock from '@/components/AffiliateBlock';
 import AuthorBox from '@/components/AuthorBox';
-import NewsletterSignup from '@/components/NewsletterSignup';
 import CategoryBadge from '@/components/CategoryBadge';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
@@ -17,8 +17,13 @@ import ProductCard from '@/components/ProductCard';
 import BackButton from '@/components/BackButton';
 import TrendingArticle from '@/components/TrendingArticle';
 import NewsletterCTA from '@/components/NewsletterCTA';
-import AdSenseInFeed from '@/components/AdSenseInFeed';
-import AdSenseInArticle from '@/components/AdSenseInArticle';
+
+// Dynamic imports for non-critical components to reduce initial JS bundle
+const NewsletterSignup = dynamic(() => import('@/components/NewsletterSignup'), {
+  loading: () => <div className="h-32 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />,
+});
+const AdSenseInFeed = dynamic(() => import('@/components/AdSenseInFeed'));
+const AdSenseInArticle = dynamic(() => import('@/components/AdSenseInArticle'));
 
 // MDX components that can be used in posts
 const components = {
