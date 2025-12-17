@@ -36,7 +36,8 @@ export default function AuthorBox({ author }: AuthorBoxProps) {
                   isDefaultAuthor ? "object-contain scale-75" : "object-cover"
                 }`}
                 style={isDefaultAuthor ? { filter: "brightness(0) invert(1)" } : undefined}
-                priority={false}
+                loading="lazy"
+                decoding="async"
               />
             </div>
             {isDefaultAuthor && (

@@ -156,6 +156,8 @@ export default async function PostPage({ params }: Props) {
                 className="w-full h-full object-cover"
                 width={1200}
                 height={630}
+                priority
+                sizes="(min-width: 1024px) 896px, 100vw"
               />
             </div>
           )}

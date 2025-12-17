@@ -38,7 +38,10 @@ export default function TrendingArticle({ post }: TrendingArticleProps) {
                 src={post.image}
                 alt={post.title}
                 fill
+                sizes="(min-width: 640px) 192px, 100vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+                decoding="async"
               />
             </div>
           )}
