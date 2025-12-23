@@ -46,6 +46,12 @@ export default function Header() {
             >
               Categories
             </Link>
+            <Link
+              href="/contact"
+              className="text-zinc-300 hover:text-emerald-400 font-medium transition-colors"
+            >
+              Contact
+            </Link>
           </div>
         </div>
       </nav>

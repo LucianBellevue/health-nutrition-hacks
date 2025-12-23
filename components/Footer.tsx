@@ -106,12 +106,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a
-                  href="mailto:info@healthnutritionhacks.com"
+                <Link
+                  href="/contact"
                   className="text-zinc-600 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
                 >
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
