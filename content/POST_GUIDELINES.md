@@ -21,10 +21,11 @@ public/images/posts/[post-slug]/
 ```
 
 **Image Requirements:**
-- Format: `.webp` (preferred for compression)
+- Format: `.webp` or `.jpg` (webp preferred for compression)
 - Hero image: 1200×630px minimum (16:8 aspect ratio)
 - Section images: 1600×900px recommended (16:9 aspect ratio)
 - Optimize before uploading (use Squoosh or similar)
+- **Important:** Ensure file extension matches actual format (check file headers if unsure)
 
 ---
 
@@ -64,14 +65,39 @@ readingTime: X
 1. Hero Image (PostImage component)
 2. Opening paragraph (hook the reader)
 3. Quick-scan info cards (optional - 3 columns)
-4. Disclaimer/reminder blockquote
-5. Main content sections with H2 headings
-6. Section images between major topics
-7. Product recommendations (if applicable)
-8. Tips/actionable takeaways
-9. CTA block
-10. FAQ section
-11. References
+4. Disclaimer (small footnote-style span)
+5. Section divider (---)
+6. Main content sections with H2 headings
+7. Use &nbsp; between ### subsections for visual spacing
+8. Section images between major topics
+9. Product recommendations (ProductCard component)
+10. Section divider (---)
+11. Tips/actionable takeaways
+12. CTA block
+13. Section divider (---)
+14. FAQ section
+15. Section divider (---)
+16. References section (REQUIRED)
+```
+
+### Heading Spacing
+
+Add `&nbsp;` before each `###` subsection heading to create visual separation:
+
+```mdx
+## Main Section Title
+
+&nbsp;
+
+### 1) First subsection
+
+Content here...
+
+&nbsp;
+
+### 2) Second subsection
+
+Content here...
 ```
 
 ---
@@ -130,11 +156,17 @@ Use for quick-scan information at the top of posts:
 </div>
 ```
 
-### Blockquote/Disclaimer
+### Disclaimer (Friendly Reminder)
+
+**DO NOT use blockquotes for disclaimers.** Use this styled span instead:
 
 ```mdx
-> **Friendly reminder:** This article is educational and not medical advice. Always consult with a qualified professional before making changes.
+<span className="block text-xs text-zinc-500 dark:text-zinc-400 italic mt-6 mb-8">
+  Friendly reminder: This article is educational and not medical advice. If you have persistent symptoms, speak with a qualified professional.
+</span>
 ```
+
+This renders as small, subtle footnote text that doesn't distract from the content.
 
 ### Two-Column Tips Grid
 
@@ -301,6 +333,11 @@ Place before the FAQ section:
 - ✅ Test on mobile viewport before publishing
 - ✅ Use semantic HTML (`<article>`, `<section>`, `<details>`)
 - ✅ Include `target="_blank" rel="noopener noreferrer"` on external links
+- ✅ Use `&nbsp;` between subsections for visual spacing
+- ✅ Use `---` section dividers between major sections
+- ✅ Include a References section with source links (REQUIRED)
+- ✅ Use `ProductCard` component for affiliate links (not raw HTML)
+- ✅ Add internal links to related posts using `/blog/[slug]` format
 
 ### DON'T:
 - ❌ Use `<p>` tags inside `not-prose` divs (causes hydration errors)
@@ -309,17 +346,41 @@ Place before the FAQ section:
 - ❌ Hardcode image paths (use the slug-based convention)
 - ❌ Skip the frontmatter image field
 - ❌ Use emojis unless specifically requested
+- ❌ Use `{" "}` JSX spacers (causes rendering issues)
+- ❌ Use blockquotes (`>`) for disclaimers (use styled span)
+- ❌ Use raw HTML for product cards (use ProductCard component)
 
 ---
 
 ## Checklist Before Submission
 
+### Required Elements
 - [ ] Frontmatter complete with all required fields
+- [ ] Hero image (PostImage with variant="hero")
+- [ ] Opening paragraph
+- [ ] Info cards (3-column grid)
+- [ ] Disclaimer (styled span, NOT blockquote)
+- [ ] At least one section image (PostImage with variant="section")
+- [ ] Product recommendations using `ProductCard` component
+- [ ] CTA block before FAQ
+- [ ] FAQ section with `<details>` accordions (first one `open`)
+- [ ] References section with numbered source links (REQUIRED)
+
+### Technical Checks
 - [ ] Images added to `public/images/posts/[slug]/`
 - [ ] Hero image is 1200×630px or larger
-- [ ] All images use `PostImage` component
-- [ ] No `<p>` tags inside custom divs
+- [ ] All images use `PostImage` component (no raw `<img>` tags)
+- [ ] No `<p>` tags inside custom divs (use `<span className="block">`)
+- [ ] No `{" "}` JSX spacers anywhere
 - [ ] External links have `target="_blank" rel="noopener noreferrer"`
-- [ ] FAQ section uses `<details>` accordions
-- [ ] References section with proper source links
-- [ ] Tested locally with `npm run dev`
+- [ ] Internal links use `/blog/[slug]` format
+- [ ] `&nbsp;` spacing between `###` subsections
+- [ ] `---` dividers between major sections
+- [ ] Tested locally with `npm run dev` (no hydration errors)
+
+### Content Quality
+- [ ] Claims backed by numbered citations [1], [2], etc.
+- [ ] References link to reputable sources (NIH, Harvard, Mayo Clinic, etc.)
+- [ ] Related reading links to other blog posts
+- [ ] Alt text on all images
+- [ ] Mobile viewport tested

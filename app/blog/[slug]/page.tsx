@@ -238,7 +238,7 @@ export default async function PostPage({ params }: Props) {
         {/* Article Footer */}
         <footer className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-zinc-200 dark:border-zinc-800">
           <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-lg p-4 sm:p-6 border border-emerald-100 dark:border-emerald-900">
-            <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
               <strong>Disclaimer:</strong> The information provided in this article is for educational purposes only and should not be considered medical advice. Always consult with a qualified healthcare professional before making any changes to your diet or health routine.
             </p>
           </div>

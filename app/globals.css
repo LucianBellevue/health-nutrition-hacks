@@ -19,6 +19,48 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-montserrat), 'Montserrat', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-montserrat), "Montserrat", system-ui, -apple-system,
+    sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Prose heading styles */
+article h2,
+.prose h2 {
+  font-size: 1.875rem !important;
+  font-weight: 700 !important;
+  margin-top: 3rem !important;
+  margin-bottom: 1.5rem !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.025em !important;
+  color: #18181b !important;
+}
+
+article h3,
+.prose h3 {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.025em !important;
+  color: #18181b !important;
+}
+
+.dark article h2,
+.dark article h3,
+.dark .prose h2,
+.dark .prose h3 {
+  color: #f4f4f5 !important;
+}
+
+@media (min-width: 640px) {
+  article h2,
+  .prose h2 {
+    font-size: 2.25rem !important;
+  }
+  article h3,
+  .prose h3 {
+    font-size: 1.75rem !important;
+  }
 }
