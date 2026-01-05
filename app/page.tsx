@@ -138,9 +138,6 @@ export default function Home() {
 
       {/* Features Section */}
       <section className="relative py-16 sm:py-20">
-        <div aria-hidden="true" className="absolute inset-0 bg-white dark:bg-zinc-900" />
-        <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-24 bg-linear-to-b from-teal-50/50 to-transparent dark:from-emerald-950/30" />
-        <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-zinc-50 to-transparent dark:from-zinc-800" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-100 mb-4">
@@ -206,9 +203,6 @@ export default function Home() {
 
       {/* Latest Posts Section */}
       <section id="latest" className="relative py-16 sm:py-20">
-        <div aria-hidden="true" className="absolute inset-0 bg-zinc-50 dark:bg-zinc-800" />
-        <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-24 bg-linear-to-b from-white to-transparent dark:from-zinc-900" />
-        <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-white to-transparent dark:from-zinc-900" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-12">
             <div>
@@ -254,9 +248,6 @@ export default function Home() {
 
       {/* About Section */}
       <section id="about" className="relative py-16 sm:py-20">
-        <div aria-hidden="true" className="absolute inset-0 bg-white dark:bg-zinc-900" />
-        <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-24 bg-linear-to-b from-zinc-50 to-transparent dark:from-zinc-800" />
-        <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-emerald-50/70 to-transparent dark:from-emerald-950/40" />
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
             <div>

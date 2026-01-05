@@ -10,26 +10,35 @@ declare global {
 
 export default function AdSenseInArticle() {
   const initialized = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Prevent duplicate initialization and use rAF to avoid forced reflow
     if (initialized.current) return;
-    initialized.current = true;
 
-    requestAnimationFrame(() => {
+    const initAd = () => {
+      const container = containerRef.current;
+      if (!container || container.offsetWidth < 250) {
+        // Retry after a short delay if container isn't ready
+        setTimeout(initAd, 100);
+        return;
+      }
+
+      initialized.current = true;
       try {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch (err) {
         console.error('AdSense error:', err);
       }
-    });
+    };
+
+    requestAnimationFrame(initAd);
   }, []);
 
   return (
-    <div className="my-6">
+    <div ref={containerRef} className="my-6 min-w-[280px] w-full">
       <ins
         className="adsbygoogle"
-        style={{ display: 'block', textAlign: 'center' }}
+        style={{ display: 'block', textAlign: 'center', minWidth: '250px', width: '100%' }}
         data-ad-layout="in-article"
         data-ad-format="fluid"
         data-ad-client="ca-pub-6330166847282337"
