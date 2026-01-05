@@ -9,27 +9,36 @@ declare global {
 }
 
 export default function AdSenseMultiplex() {
-  const initialized = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Prevent duplicate initialization and use rAF to avoid forced reflow
-    if (initialized.current) return;
-    initialized.current = true;
+    const container = containerRef.current;
+    if (!container) return;
 
-    requestAnimationFrame(() => {
+    const ins = container.querySelector('ins.adsbygoogle');
+    if (!ins || ins.getAttribute('data-adsbygoogle-status')) return;
+
+    const initAd = () => {
+      if (container.offsetWidth < 250) {
+        setTimeout(initAd, 100);
+        return;
+      }
+
       try {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (err) {
-        console.error('AdSense error:', err);
+      } catch {
+        // Silently ignore duplicate ad errors
       }
-    });
+    };
+
+    requestAnimationFrame(initAd);
   }, []);
 
   return (
-    <div className="my-8 sm:my-12">
+    <div ref={containerRef} className="my-8 sm:my-12 min-w-[280px] w-full">
       <ins
         className="adsbygoogle"
-        style={{ display: 'block' }}
+        style={{ display: 'block', minWidth: '250px', width: '100%' }}
         data-ad-format="autorelaxed"
         data-ad-client="ca-pub-6330166847282337"
         data-ad-slot="5667162519"

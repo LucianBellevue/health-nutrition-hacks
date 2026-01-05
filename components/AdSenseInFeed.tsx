@@ -9,24 +9,25 @@ declare global {
 }
 
 export default function AdSenseInFeed() {
-  const initialized = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (initialized.current) return;
+    const container = containerRef.current;
+    if (!container) return;
+
+    const ins = container.querySelector('ins.adsbygoogle');
+    if (!ins || ins.getAttribute('data-adsbygoogle-status')) return;
 
     const initAd = () => {
-      const container = containerRef.current;
-      if (!container || container.offsetWidth < 250) {
+      if (container.offsetWidth < 250) {
         setTimeout(initAd, 100);
         return;
       }
 
-      initialized.current = true;
       try {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (err) {
-        console.error('AdSense error:', err);
+      } catch {
+        // Silently ignore duplicate ad errors
       }
     };
 
