@@ -42,6 +42,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${category.name} – Health Nutrition Hacks`,
     description: `Browse all ${category.name.toLowerCase()} posts. ${category.count} articles about ${category.name.toLowerCase()}.`,
+    alternates: {
+      canonical: `/categories/${categorySlug}`,
+    },
     openGraph: {
       title: `${category.name} – Health Nutrition Hacks`,
       description: `Browse all ${category.name.toLowerCase()} posts. ${category.count} articles about ${category.name.toLowerCase()}.`,

@@ -9,6 +9,9 @@ const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
 export const metadata: Metadata = {
   title: 'Categories – Health Nutrition Hacks',
   description: 'Browse all categories of nutrition and health topics.',
+  alternates: {
+    canonical: '/categories',
+  },
   openGraph: {
     title: 'Categories – Health Nutrition Hacks',
     description: 'Browse all categories of nutrition and health topics.',

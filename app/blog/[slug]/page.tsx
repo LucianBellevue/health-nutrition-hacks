@@ -78,6 +78,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${metadata.title} – Health Nutrition Hacks`,
       description: metadata.description,
       authors: metadata.author ? [{ name: metadata.author }] : undefined,
+      alternates: {
+        canonical: `/blog/${slug}`,
+      },
       openGraph: {
         title: metadata.title,
         description: metadata.description,

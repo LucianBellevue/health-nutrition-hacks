@@ -19,6 +19,9 @@ const SITE_URL = 'https://www.healthnutritionhacks.com';
 export const metadata: Metadata = {
   title: 'Nutrition Blog – Health Nutrition Hacks',
   description: 'Discover evidence-based nutrition tips, healthy recipes, and wellness advice from our expert team.',
+  alternates: {
+    canonical: '/blog',
+  },
   openGraph: {
     title: 'Nutrition Blog – Health Nutrition Hacks',
     description: 'Discover evidence-based nutrition tips, healthy recipes, and wellness advice from our expert team.',
