@@ -7,6 +7,9 @@ const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
 export const metadata: Metadata = {
   title: 'Cookie Policy – Health Nutrition Hacks',
   description: 'Learn how Health Nutrition Hacks uses cookies and similar technologies to improve your browsing experience.',
+  alternates: {
+    canonical: '/cookies',
+  },
   openGraph: {
     title: 'Cookie Policy – Health Nutrition Hacks',
     description: 'Learn how Health Nutrition Hacks uses cookies and similar technologies to improve your browsing experience.',
