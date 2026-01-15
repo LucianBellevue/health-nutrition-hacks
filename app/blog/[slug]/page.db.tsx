@@ -18,14 +18,14 @@ import BackButton from '@/components/BackButton';
 import TrendingArticle from '@/components/TrendingArticle';
 import NewsletterCTA from '@/components/NewsletterCTA';
 
-// Dynamic imports for non-critical components to reduce initial JS bundle
+// Dynamic imports for non-critical components
 const NewsletterSignup = dynamic(() => import('@/components/NewsletterSignup'), {
   loading: () => <div className="h-32 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />,
 });
 const AdSenseInFeed = dynamic(() => import('@/components/AdSenseInFeed'));
 const AdSenseInArticle = dynamic(() => import('@/components/AdSenseInArticle'));
 
-// MDX components that can be used in posts
+// MDX components
 const components = {
   AffiliateBlock,
   PostImage,
@@ -59,9 +59,6 @@ export async function generateStaticParams() {
   }));
 }
 
-/**
- * Generate metadata for SEO
- */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   
@@ -247,7 +244,7 @@ export default async function PostPage({ params }: Props) {
           )}
         </Prose>
 
-        {/* Author Box - Bottom (repeated for engagement) */}
+        {/* Author Box - Bottom */}
         <AuthorBox author={author} />
 
         {/* Newsletter Signup */}

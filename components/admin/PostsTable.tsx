@@ -9,7 +9,12 @@ interface Post {
   id: string;
   title: string;
   slug: string;
-  category: string;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+  };
   published: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -104,7 +109,7 @@ export default function PostsTable({ posts }: { posts: Post[] }) {
                 </td>
                 <td className="px-6 py-4">
                   <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
-                    {post.category}
+                    {post.category.name}
                   </span>
                 </td>
                 <td className="px-6 py-4">

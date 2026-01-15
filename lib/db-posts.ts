@@ -46,6 +46,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       author: {
         select: { name: true, id: true },
       },
+      category: true,
     },
   });
 
@@ -58,7 +59,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       date: post.createdAt.toISOString().split('T')[0],
       author: post.author.name || 'Unknown',
       authorId: post.authorId,
-      category: post.category,
+      category: post.category.name,
       tags: post.tags,
       image: post.image || undefined,
       readingTime: post.readingTime || undefined,
@@ -76,6 +77,7 @@ export async function getAllPosts(): Promise<Post[]> {
       author: {
         select: { name: true, id: true },
       },
+      category: true,
     },
   });
 
@@ -86,7 +88,7 @@ export async function getAllPosts(): Promise<Post[]> {
       date: post.createdAt.toISOString().split('T')[0],
       author: post.author.name || 'Unknown',
       authorId: post.authorId,
-      category: post.category,
+      category: post.category.name,
       tags: post.tags,
       image: post.image || undefined,
       readingTime: post.readingTime || undefined,
@@ -104,14 +106,14 @@ export async function getRecentPosts(limit?: number): Promise<Post[]> {
 export async function getAllCategories(): Promise<Category[]> {
   const posts = await prisma.post.findMany({
     where: { published: true },
-    select: { category: true },
+    include: { category: true },
   });
 
   const categoryMap = new Map<string, number>();
 
   posts.forEach((post) => {
     if (post.category) {
-      categoryMap.set(post.category, (categoryMap.get(post.category) || 0) + 1);
+      categoryMap.set(post.category.name, (categoryMap.get(post.category.name) || 0) + 1);
     }
   });
 

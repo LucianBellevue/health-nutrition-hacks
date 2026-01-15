@@ -30,6 +30,7 @@ export default async function AdminPostsPage({
       author: {
         select: { name: true, email: true },
       },
+      category: true,
     },
   });
 

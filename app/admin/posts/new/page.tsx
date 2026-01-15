@@ -1,4 +1,4 @@
-import PostEditor from '@/components/admin/PostEditor';
+import PostEditor from '@/components/admin/PostEditor.mdx';
 
 export default function NewPostPage() {
   return (

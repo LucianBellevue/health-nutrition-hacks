@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import PostEditor from '@/components/admin/PostEditor';
+import PostEditor from '@/components/admin/PostEditor.mdx';
 
 export default async function EditPostPage({
   params,
@@ -11,6 +11,9 @@ export default async function EditPostPage({
   
   const post = await prisma.post.findUnique({
     where: { slug },
+    include: {
+      category: true,
+    },
   });
 
   if (!post) {
@@ -34,10 +37,14 @@ export default async function EditPostPage({
           slug: post.slug,
           description: post.description,
           content: post.content,
+          categoryId: post.categoryId,
           category: post.category,
           tags: post.tags,
           image: post.image || '',
           published: post.published,
+          scheduledAt: post.scheduledAt?.toISOString().slice(0, 16) || '',
+          metaTitle: post.metaTitle || '',
+          metaDescription: post.metaDescription || '',
         }}
       />
     </div>
