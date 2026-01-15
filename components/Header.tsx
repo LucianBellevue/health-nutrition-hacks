@@ -1,10 +1,17 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAppSelector } from '@/store/hooks';
 
 /**
  * Site header with logo, navigation, and theme toggle
  */
 export default function Header() {
+  const isAdminRoute = useAppSelector((state) => state.ui.isAdminRoute);
+
+  if (isAdminRoute) return null;
+
   return (
     <header className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800">
       <div className="bg-linear-to-br from-emerald-500 to-teal-500 py-1">

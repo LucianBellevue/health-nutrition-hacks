@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import { getAllPosts, getAllCategories } from '@/lib/posts';
+import { getAllPosts, getAllCategories } from '@/lib/db-posts';
 import BlogList from '@/components/BlogList';
 import Pagination from '@/components/Pagination';
 import Link from 'next/link';
@@ -54,8 +54,8 @@ interface BlogPageProps {
  */
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const params = await searchParams;
-  const allPosts = getAllPosts();
-  const categories = getAllCategories();
+  const allPosts = await getAllPosts();
+  const categories = await getAllCategories();
 
   // Parse page number from query params
   const currentPage = Math.max(1, parseInt(params.page || '1', 10));

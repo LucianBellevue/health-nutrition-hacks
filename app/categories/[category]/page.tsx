@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getAllCategories, getPostsByCategory, getCategoryBySlug } from '@/lib/posts';
+import { getAllCategories, getPostsByCategory, getCategoryBySlug } from '@/lib/db-posts';
 import PostCard from '@/components/PostCard';
 import Pagination from '@/components/Pagination';
 import Link from 'next/link';
@@ -20,7 +20,7 @@ interface Props {
  * Generate static params for all categories
  */
 export async function generateStaticParams() {
-  const categories = getAllCategories();
+  const categories = await getAllCategories();
   return categories.map((category) => ({
     category: category.slug,
   }));
@@ -31,7 +31,7 @@ export async function generateStaticParams() {
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category: categorySlug } = await params;
-  const category = getCategoryBySlug(categorySlug);
+  const category = await getCategoryBySlug(categorySlug);
 
   if (!category) {
     return {
@@ -75,13 +75,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { category: categorySlug } = await params;
   const queryParams = await searchParams;
-  const category = getCategoryBySlug(categorySlug);
+  const category = await getCategoryBySlug(categorySlug);
 
   if (!category) {
     notFound();
   }
 
-  const allPosts = getPostsByCategory(categorySlug);
+  const allPosts = await getPostsByCategory(categorySlug);
 
   // Parse page number from query params
   const currentPage = Math.max(1, parseInt(queryParams.page || '1', 10));

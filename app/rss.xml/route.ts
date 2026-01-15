@@ -1,8 +1,8 @@
-import { getAllPosts } from '@/lib/posts';
+import { getAllPosts } from '@/lib/db-posts';
 
 export async function GET() {
-  const posts = getAllPosts();
-  const siteUrl = 'https://healthnutritionhacks.com'; // Update with your actual domain
+  const posts = await getAllPosts();
+  const siteUrl = 'https://www.healthnutritionhacks.com';
 
   const rssItems = posts
     .map((post) => {

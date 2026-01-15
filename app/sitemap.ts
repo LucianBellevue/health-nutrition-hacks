@@ -1,9 +1,9 @@
 import { MetadataRoute } from 'next';
-import { getAllPosts } from '@/lib/posts';
+import { getAllPosts } from '@/lib/db-posts';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = 'https://healthnutritionhacks.com'; // Update with your actual domain
-  const posts = getAllPosts();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const siteUrl = 'https://www.healthnutritionhacks.com';
+  const posts = await getAllPosts();
 
   const blogPosts = posts.map((post) => ({
     url: `${siteUrl}/blog/${post.metadata.slug}`,

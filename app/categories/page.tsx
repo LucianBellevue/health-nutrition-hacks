@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { getAllCategories, normalizeCategoryToSlug } from "@/lib/posts";
+import { getAllCategories, normalizeCategoryToSlug } from "@/lib/db-posts";
 import { CATEGORY_CATALOG } from "@/lib/categoryConfig";
 
 const SITE_URL = 'https://www.healthnutritionhacks.com';
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
 /**
  * Categories index page - lists all categories
  */
-export default function CategoriesPage() {
-  const categoryCounts = getAllCategories();
+export default async function CategoriesPage() {
+  const categoryCounts = await getAllCategories();
   const countsBySlug = new Map(categoryCounts.map((category) => [category.slug, category.count]));
   const categories = CATEGORY_CATALOG.map((definition) => {
     const slug = normalizeCategoryToSlug(definition.name);
