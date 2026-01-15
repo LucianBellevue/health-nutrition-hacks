@@ -1,36 +1,39 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { auth } from '@/lib/auth';
 
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  
-  // Get the session token from cookies
-  const sessionToken = request.cookies.get('authjs.session-token')?.value 
-    || request.cookies.get('__Secure-authjs.session-token')?.value;
-  
-  const isLoggedIn = !!sessionToken;
-  const isAdminRoute = pathname.startsWith('/admin');
-  const isLoginPage = pathname === '/admin/login';
-  const isApiAuthRoute = pathname.startsWith('/api/auth');
+export const proxy = auth((req) => {
+  const { pathname } = req.nextUrl;
+  const isAuthenticated = !!req.auth;
 
-  // Allow API auth routes
-  if (isApiAuthRoute) {
-    return NextResponse.next();
+  // Admin login page - redirect to dashboard if already logged in
+  if (pathname === '/admin/login') {
+    if (isAuthenticated) {
+      return Response.redirect(new URL('/admin', req.url));
+    }
+    return;
   }
 
-  // Redirect logged-in users away from login page
-  if (isLoginPage && isLoggedIn) {
-    return NextResponse.redirect(new URL('/admin', request.url));
+  // All other admin routes - require authentication
+  if (pathname.startsWith('/admin')) {
+    if (!isAuthenticated) {
+      const loginUrl = new URL('/admin/login', req.url);
+      loginUrl.searchParams.set('callbackUrl', pathname);
+      return Response.redirect(loginUrl);
+    }
+    return;
   }
 
-  // Protect admin routes
-  if (isAdminRoute && !isLoginPage && !isLoggedIn) {
-    return NextResponse.redirect(new URL('/admin/login', request.url));
+  // Admin API routes - require authentication
+  if (pathname.startsWith('/api/admin')) {
+    if (!isAuthenticated) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    return;
   }
-
-  return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    '/admin/:path*',
+    '/api/admin/:path*',
+  ],
 };

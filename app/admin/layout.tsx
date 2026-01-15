@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import AdminRouteProvider from '@/components/admin/AdminRouteProvider';
+import SessionProvider from '@/components/providers/SessionProvider';
 
 export const metadata = {
   title: 'Admin Dashboard - Health & Nutrition Hacks',
@@ -17,20 +18,26 @@ export default async function AdminLayout({
 
   // Don't apply admin layout to login page
   if (!session) {
-    return <AdminRouteProvider>{children}</AdminRouteProvider>;
+    return (
+      <SessionProvider>
+        <AdminRouteProvider>{children}</AdminRouteProvider>
+      </SessionProvider>
+    );
   }
 
   return (
-    <AdminRouteProvider>
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-        <AdminHeader user={session.user} />
-        <div className="flex">
-          <AdminSidebar />
-          <main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 mt-16">
-            {children}
-          </main>
+    <SessionProvider>
+      <AdminRouteProvider>
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+          <AdminHeader user={session.user} />
+          <div className="flex">
+            <AdminSidebar />
+            <main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 mt-16">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
-    </AdminRouteProvider>
+      </AdminRouteProvider>
+    </SessionProvider>
   );
 }
