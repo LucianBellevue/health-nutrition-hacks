@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -28,6 +28,11 @@ import {
   Calendar,
   X,
   Loader2,
+  AlertCircle,
+  CheckCircle,
+  FileText,
+  RefreshCw,
+  Link as LinkIcon2,
 } from 'lucide-react';
 
 interface Category {
@@ -58,12 +63,19 @@ interface PostEditorProps {
 
 export default function PostEditor({ initialData }: PostEditorProps) {
   const router = useRouter();
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [showSeoFields, setShowSeoFields] = useState(false);
   const [showScheduling, setShowScheduling] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [slugExists, setSlugExists] = useState(false);
+  const [imageFileSize, setImageFileSize] = useState<number | null>(null);
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
   const [showFeaturedImageModal, setShowFeaturedImageModal] = useState(false);
   const [featuredImageData, setFeaturedImageData] = useState({
     file: null as File | null,
@@ -86,26 +98,142 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   });
   const [tagInput, setTagInput] = useState('');
 
-  // Fetch categories on mount
+  // Character count helpers
+  const titleLength = formData.title.length;
+  const descLength = formData.description.length;
+  const contentWordCount = formData.content.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length;
+
+  // SEO indicators
+  const titleSeoStatus = titleLength >= 50 && titleLength <= 60 ? 'good' : titleLength > 60 ? 'warning' : 'info';
+  const descSeoStatus = descLength >= 150 && descLength <= 160 ? 'good' : descLength > 160 ? 'warning' : 'info';
+
+  // Fetch categories and tags on mount
   useEffect(() => {
-    async function fetchCategories() {
+    async function fetchData() {
       try {
-        const res = await fetch('/api/admin/categories');
-        if (res.ok) {
-          const data = await res.json();
+        const [categoriesRes, postsRes] = await Promise.all([
+          fetch('/api/admin/categories'),
+          fetch('/api/admin/posts')
+        ]);
+        
+        if (categoriesRes.ok) {
+          const data = await categoriesRes.json();
           setCategories(data);
-          // Set default category if not set
           if (!formData.categoryId && data.length > 0) {
             setFormData((prev) => ({ ...prev, categoryId: data[0].id }));
           }
         }
+
+        if (postsRes.ok) {
+          const posts = await postsRes.json();
+          const uniqueTags = Array.from(new Set(posts.flatMap((p: { tags: string[] }) => p.tags || [])));
+          setAllTags(uniqueTags as string[]);
+        }
       } catch (error) {
-        console.error('Failed to fetch categories:', error);
+        console.error('Failed to fetch data:', error);
       }
     }
-    fetchCategories();
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-save to localStorage every 30 seconds
+  useEffect(() => {
+    const autoSave = () => {
+      try {
+        localStorage.setItem('post-draft-tiptap', JSON.stringify(formData));
+        setLastSaved(new Date());
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      }
+    };
+
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    autoSaveTimerRef.current = setTimeout(autoSave, 30000);
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [formData]);
+
+  // Load draft from localStorage on mount
+  useEffect(() => {
+    if (!initialData?.id) {
+      try {
+        const draft = localStorage.getItem('post-draft-tiptap');
+        if (draft) {
+          const parsed = JSON.parse(draft);
+          if (parsed.title || parsed.content) {
+            const shouldLoad = window.confirm('Found a saved draft. Would you like to load it?');
+            if (shouldLoad) {
+              setFormData(parsed);
+              if (editor && parsed.content) {
+                editor.commands.setContent(parsed.content);
+              }
+            } else {
+              localStorage.removeItem('post-draft-tiptap');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load draft:', error);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Check if slug exists
+  useEffect(() => {
+    if (formData.slug && formData.slug !== initialData?.slug) {
+      const checkSlug = async () => {
+        try {
+          const res = await fetch('/api/admin/posts');
+          if (res.ok) {
+            const posts = await res.json();
+            const exists = posts.some((p: PostData) => p.slug === formData.slug && p.id !== initialData?.id);
+            setSlugExists(exists);
+          }
+        } catch (error) {
+          console.error('Failed to check slug:', error);
+        }
+      };
+      const timer = setTimeout(checkSlug, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setSlugExists(false);
+    }
+  }, [formData.slug, initialData?.slug, initialData?.id]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        handleSubmit(false);
+      }
+      if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+        e.preventDefault();
+        handleSubmit(true);
+      }
+      if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+        e.preventDefault();
+        handleEditorImageUpload();
+      }
+      if (e.key === 'Escape') {
+        setShowFeaturedImageModal(false);
+        setShowTemplates(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData]);
 
   const editor = useEditor({
     extensions: [
@@ -153,7 +281,38 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       ...prev,
       title,
       slug: initialData?.slug ? prev.slug : generateSlug(title),
+      metaTitle: prev.metaTitle || title.slice(0, 60),
     }));
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const description = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      description,
+      metaDescription: prev.metaDescription || description.slice(0, 160),
+    }));
+  };
+
+  const handleResetSlug = () => {
+    setFormData((prev) => ({
+      ...prev,
+      slug: generateSlug(prev.title),
+    }));
+  };
+
+  const applyTemplate = (template: string) => {
+    const templates = {
+      howto: `<h2>Introduction</h2><p>Brief overview of what you'll learn in this guide.</p><h2>What You'll Need</h2><ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul><h2>Step-by-Step Guide</h2><h3>Step 1: [Title]</h3><p>Detailed instructions...</p><h3>Step 2: [Title]</h3><p>Detailed instructions...</p><h2>Tips &amp; Best Practices</h2><ul><li>Tip 1</li><li>Tip 2</li></ul><h2>Conclusion</h2><p>Summary and next steps...</p>`,
+      listicle: `<h2>Introduction</h2><p>Why this list matters...</p><h2>1. [First Item]</h2><p>Detailed explanation...</p><h2>2. [Second Item]</h2><p>Detailed explanation...</p><h2>3. [Third Item]</h2><p>Detailed explanation...</p><h2>Conclusion</h2><p>Key takeaways...</p>`,
+      review: `<h2>Overview</h2><p>Brief introduction...</p><h2>Pros</h2><ul><li>Benefit 1</li><li>Benefit 2</li></ul><h2>Cons</h2><ul><li>Drawback 1</li><li>Drawback 2</li></ul><h2>Key Features</h2><h3>Feature 1</h3><p>Details...</p><h2>Final Verdict</h2><p>Overall recommendation...</p>`,
+    };
+    const templateContent = templates[template as keyof typeof templates];
+    if (editor && templateContent) {
+      editor.commands.setContent(templateContent);
+      setFormData((prev) => ({ ...prev, content: templateContent }));
+    }
+    setShowTemplates(false);
   };
 
   const handleAddTag = () => {
@@ -163,7 +322,31 @@ export default function PostEditor({ initialData }: PostEditorProps) {
         tags: [...prev.tags, tagInput.trim()],
       }));
       setTagInput('');
+      setTagSuggestions([]);
     }
+  };
+
+  const handleTagInputChange = (value: string) => {
+    setTagInput(value);
+    if (value.trim()) {
+      const suggestions = allTags.filter(
+        tag => tag.toLowerCase().includes(value.toLowerCase()) && !formData.tags.includes(tag)
+      ).slice(0, 5);
+      setTagSuggestions(suggestions);
+    } else {
+      setTagSuggestions([]);
+    }
+  };
+
+  const selectTagSuggestion = (tag: string) => {
+    if (!formData.tags.includes(tag)) {
+      setFormData((prev) => ({
+        ...prev,
+        tags: [...prev.tags, tag],
+      }));
+    }
+    setTagInput('');
+    setTagSuggestions([]);
   };
 
   const handleRemoveTag = (tag: string) => {
@@ -180,6 +363,8 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   const handleFeaturedImageFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setImageFileSize(file.size);
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -345,11 +530,29 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
   return (
     <div className="space-y-6">
+      {/* Auto-save indicator */}
+      {lastSaved && (
+        <div className="fixed top-4 right-4 z-40 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 flex items-center gap-2 text-sm">
+          <CheckCircle className="h-4 w-4 text-emerald-500" />
+          <span className="text-gray-700 dark:text-gray-300">
+            Saved {new Date(lastSaved).toLocaleTimeString()}
+          </span>
+        </div>
+      )}
+
+      {/* Keyboard shortcuts hint */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm text-blue-800 dark:text-blue-300">
+        <strong>Shortcuts:</strong> Ctrl+S (Save) • Ctrl+Shift+P (Publish) • Ctrl+Shift+I (Insert Image) • Esc (Close Modals)
+      </div>
+
       {/* Title & Slug */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Title
+            <span className={`ml-2 text-xs ${titleSeoStatus === 'good' ? 'text-emerald-600' : titleSeoStatus === 'warning' ? 'text-amber-600' : 'text-gray-500'}`}>
+              ({titleLength} chars {titleLength >= 50 && titleLength <= 60 ? '✓ Optimal' : titleLength > 60 ? '⚠ Too long' : '→ Aim for 50-60'})
+            </span>
           </label>
           <input
             type="text"
@@ -363,25 +566,46 @@ export default function PostEditor({ initialData }: PostEditorProps) {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Slug
           </label>
-          <input
-            type="text"
-            value={formData.slug}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, slug: e.target.value }))
-            }
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-            placeholder="post-url-slug"
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={formData.slug}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, slug: e.target.value }))
+              }
+              className={`flex-1 px-4 py-2 border ${slugExists ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent`}
+              placeholder="post-url-slug"
+            />
+            <button
+              type="button"
+              onClick={handleResetSlug}
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
+              title="Generate from title"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </button>
+          </div>
+          {slugExists && (
+            <p className="text-sm text-red-500 mt-1 flex items-center gap-1">
+              <AlertCircle className="h-4 w-4" />
+              This slug already exists. Choose a unique one.
+            </p>
+          )}
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+            <LinkIcon2 className="h-3 w-3" />
+            Preview: yourblog.com/blog/{formData.slug || 'your-slug'}
+          </p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Description
+            <span className={`ml-2 text-xs ${descSeoStatus === 'good' ? 'text-emerald-600' : descSeoStatus === 'warning' ? 'text-amber-600' : 'text-gray-500'}`}>
+              ({descLength} chars {descLength >= 150 && descLength <= 160 ? '✓ Optimal' : descLength > 160 ? '⚠ Too long' : '→ Aim for 150-160'})
+            </span>
           </label>
           <textarea
             value={formData.description}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, description: e.target.value }))
-            }
+            onChange={handleDescriptionChange}
             rows={3}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
             placeholder="Brief description for SEO and previews"
@@ -391,6 +615,22 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
       {/* Editor */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+              Content (Rich Text Editor)
+              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">({contentWordCount} words)</span>
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowTemplates(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
+          >
+            <FileText className="h-4 w-4" />
+            Templates
+          </button>
+        </div>
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
           <button
@@ -643,24 +883,40 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               </span>
             ))}
           </div>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) =>
-                e.key === 'Enter' && (e.preventDefault(), handleAddTag())
-              }
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              placeholder="Add a tag"
-            />
-            <button
-              type="button"
-              onClick={handleAddTag}
-              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-            >
-              Add
-            </button>
+          <div className="relative">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => handleTagInputChange(e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === 'Enter' && (e.preventDefault(), handleAddTag())
+                }
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                placeholder="Add a tag (start typing for suggestions)"
+              />
+              <button
+                type="button"
+                onClick={handleAddTag}
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                Add
+              </button>
+            </div>
+            {tagSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                {tagSuggestions.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => selectTagSuggestion(tag)}
+                    className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -820,12 +1076,20 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               )}
             </div>
 
-            {/* Helper Text */}
+            {/* Helper Text & File Size Warning */}
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
               <p className="text-sm text-blue-800 dark:text-blue-300">
                 <strong>Tip:</strong> For best results, use images at least 1200px wide. The featured image appears at the top of your post and in preview cards.
               </p>
             </div>
+            {imageFileSize && imageFileSize > 500000 && (
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                <p className="text-sm text-amber-800 dark:text-amber-300 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <strong>Large file:</strong> {(imageFileSize / (1024 * 1024)).toFixed(2)}MB. Consider compressing for faster page loads.
+                </p>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3 pt-4">
@@ -854,6 +1118,149 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                     Upload & Set as Featured
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Actions - Floating Toolbar */}
+      <div className="sticky bottom-0 z-30 bg-gradient-to-t from-gray-100 dark:from-gray-900 to-transparent pt-8 pb-4">
+        <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border-2 border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              {formData.published ? (
+                <>
+                  <Eye className="h-4 w-4 text-emerald-500" />
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400">Published</span>
+                </>
+              ) : formData.scheduledAt ? (
+                <>
+                  <Calendar className="h-4 w-4 text-blue-500" />
+                  <span className="font-medium text-blue-600 dark:text-blue-400">
+                    Scheduled for {new Date(formData.scheduledAt).toLocaleString()}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <EyeOff className="h-4 w-4 text-amber-500" />
+                  <span className="font-medium text-amber-600 dark:text-amber-400">Draft</span>
+                </>
+              )}
+            </div>
+            <span className="text-xs text-gray-500 dark:text-gray-400 border-l border-gray-300 dark:border-gray-600 pl-4">TipTap • {contentWordCount} words</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleSubmit(false)}
+              disabled={saving || slugExists}
+              className="px-5 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 flex items-center gap-2 font-medium"
+              title="Ctrl+S"
+            >
+              <Save className="h-4 w-4" />
+              Save Draft
+            </button>
+            <button
+              onClick={() => handleSubmit(true)}
+              disabled={saving || slugExists}
+              className="px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2 font-medium shadow-md"
+              title="Ctrl+Shift+P"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4" />
+                  {formData.scheduledAt ? 'Schedule' : initialData?.published ? 'Update' : 'Publish Now'}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Templates Modal */}
+      {showTemplates && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                Content Templates
+              </h3>
+              <button
+                onClick={() => setShowTemplates(false)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Choose a template to start your post with a pre-structured format.
+            </p>
+
+            <div className="grid grid-cols-1 gap-3">
+              <button
+                onClick={() => applyTemplate('howto')}
+                className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-all text-left group"
+              >
+                <div className="flex items-start gap-3">
+                  <FileText className="h-5 w-5 text-emerald-600 mt-1" />
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                      How-To Guide
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Step-by-step tutorial format with introduction, requirements, steps, and tips
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => applyTemplate('listicle')}
+                className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-all text-left group"
+              >
+                <div className="flex items-start gap-3">
+                  <FileText className="h-5 w-5 text-emerald-600 mt-1" />
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                      Listicle
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Numbered list format perfect for &quot;Top 5&quot; or &quot;10 Best&quot; style articles
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => applyTemplate('review')}
+                className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-all text-left group"
+              >
+                <div className="flex items-start gap-3">
+                  <FileText className="h-5 w-5 text-emerald-600 mt-1" />
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                      Product Review
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Comprehensive review format with pros, cons, features, and verdict
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setShowTemplates(false)}
+                className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                Cancel
               </button>
             </div>
           </div>
