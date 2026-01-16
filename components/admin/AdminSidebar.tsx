@@ -21,7 +21,7 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden lg:block overflow-y-auto">
+    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-black border-r border-emerald-500/20 hidden lg:block overflow-y-auto">
       <nav className="p-4 space-y-2">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -35,8 +35,8 @@ export default function AdminSidebar() {
               href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive
-                  ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                  : 'text-white hover:bg-emerald-500/10'
               }`}
             >
               <Icon className="h-5 w-5" />
@@ -45,11 +45,11 @@ export default function AdminSidebar() {
           );
         })}
 
-        <hr className="my-4 border-gray-200 dark:border-gray-700" />
+        <hr className="my-4 border-emerald-500/20" />
 
         <Link
           href="/"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-emerald-500/10 transition-colors"
         >
           <Home className="h-5 w-5" />
           <span className="font-medium">View Site</span>

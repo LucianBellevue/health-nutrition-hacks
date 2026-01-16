@@ -17,6 +17,7 @@ import {
   FileText,
   RefreshCw,
   Link as LinkIcon,
+  XCircle,
 } from 'lucide-react';
 
 interface Category {
@@ -49,6 +50,7 @@ interface PostEditorProps {
 export default function PostEditor({ initialData }: PostEditorProps) {
   const router = useRouter();
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadingInline, setUploadingInline] = useState(false);
@@ -62,6 +64,11 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   const [slugExists, setSlugExists] = useState(false);
   const [imageFileSize, setImageFileSize] = useState<number | null>(null);
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+  const [saveNotification, setSaveNotification] = useState<{
+    show: boolean;
+    type: 'success' | 'error';
+    message: string;
+  }>({ show: false, type: 'success', message: '' });
   const [imageModalData, setImageModalData] = useState({
     file: null as File | null,
     altText: '',
@@ -482,6 +489,20 @@ export default function PostEditor({ initialData }: PostEditorProps) {
     });
   };
 
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setSaveNotification({ show: true, type, message });
+    
+    // Clear existing timer
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+    
+    // Auto-dismiss after 4 seconds
+    toastTimerRef.current = setTimeout(() => {
+      setSaveNotification({ show: false, type: 'success', message: '' });
+    }, 4000);
+  };
+
   const handlePreview = async () => {
     if (!formData.slug) {
       alert('Please add a slug before previewing');
@@ -543,14 +564,48 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       });
 
       if (res.ok) {
-        router.push('/admin/posts');
-        router.refresh();
+        const savedPost = await res.json();
+        
+        // Verify the save by checking the returned data
+        if (!savedPost || !savedPost.id) {
+          showNotification('error', 'Save verification failed. Please try again.');
+          return;
+        }
+        
+        // Only redirect when publishing, stay in editor when saving draft
+        if (publish) {
+          showNotification('success', 'Post published successfully!');
+          setTimeout(() => {
+            router.push('/admin/posts');
+            router.refresh();
+          }, 1000);
+        } else {
+          // Verify the draft was saved by fetching it back
+          try {
+            const verifyRes = await fetch(`/api/admin/posts/${savedPost.id}`);
+            if (verifyRes.ok) {
+              const verifiedPost = await verifyRes.json();
+              if (verifiedPost && verifiedPost.id === savedPost.id) {
+                setLastSaved(new Date());
+                showNotification('success', '✓ Draft saved successfully!');
+              } else {
+                showNotification('error', 'Save verification failed. Please check your post.');
+              }
+            } else {
+              showNotification('error', 'Could not verify save. Please refresh and check.');
+            }
+          } catch {
+            // Post was saved but verification failed - show warning
+            setLastSaved(new Date());
+            showNotification('success', '✓ Draft saved (verification skipped)');
+          }
+        }
       } else {
         const data = await res.json();
-        alert(data.error || 'Failed to save post');
+        showNotification('error', data.error || 'Failed to save post');
       }
     } catch {
-      alert('An error occurred');
+      showNotification('error', 'Network error occurred. Please check your connection.');
     } finally {
       setSaving(false);
     }
@@ -558,34 +613,55 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
   return (
     <div className="space-y-6">
+      {/* Save Notification Toast */}
+      {saveNotification.show && (
+        <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-2xl border-2 flex items-center gap-3 text-sm font-medium animate-in slide-in-from-top-5 ${
+          saveNotification.type === 'success'
+            ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 text-emerald-800 dark:text-emerald-200'
+            : 'bg-red-50 dark:bg-red-900/30 border-red-500 text-red-800 dark:text-red-200'
+        }`}>
+          {saveNotification.type === 'success' ? (
+            <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+          ) : (
+            <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+          )}
+          <span>{saveNotification.message}</span>
+          <button
+            onClick={() => setSaveNotification({ show: false, type: 'success', message: '' })}
+            className="ml-2 hover:opacity-70 transition-opacity"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Auto-save indicator - Floating */}
-      {lastSaved && (
-        <div className="fixed top-4 right-4 z-40 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 flex items-center gap-2 text-sm">
+      {lastSaved && !saveNotification.show && (
+        <div className="fixed top-4 right-4 z-40 bg-black px-4 py-2 rounded-lg shadow-lg border border-emerald-500/30 flex items-center gap-2 text-sm">
           <CheckCircle className="h-4 w-4 text-emerald-500" />
-          <span className="text-gray-700 dark:text-gray-300">
+          <span className="text-white">
             Saved {new Date(lastSaved).toLocaleTimeString()}
           </span>
         </div>
       )}
 
       {/* Keyboard shortcuts hint */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm text-blue-800 dark:text-blue-300">
-        <strong>Shortcuts:</strong> Ctrl+S (Save) • Ctrl+Shift+P (Publish) • Ctrl+Shift+I (Insert Image) • Esc (Close Modals)
+      <div className="bg-black border border-emerald-500/30 rounded-lg p-3 text-sm text-white">
+        <strong className="text-emerald-400">Shortcuts:</strong> Ctrl+S (Save) • Ctrl+Shift+P (Publish) • Ctrl+Shift+I (Insert Image) • Esc (Close Modals)
       </div>
 
       {/* Preview Button - Prominent placement */}
       {formData.slug && (
-        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+        <div className="bg-black border border-emerald-500/30 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-purple-900 dark:text-purple-100 mb-1">Preview Your Post</h3>
-              <p className="text-sm text-purple-700 dark:text-purple-300">See how your post will look before publishing</p>
+              <h3 className="font-semibold text-white mb-1">Preview Your Post</h3>
+              <p className="text-sm text-emerald-400">See how your post will look before publishing</p>
             </div>
             <button
               onClick={handlePreview}
               disabled={saving || slugExists || !formData.slug}
-              className="px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium shadow-md"
-            >
+              className="px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium shadow-md">
               <Eye className="h-4 w-4" />
               Open Preview
             </button>
@@ -594,9 +670,9 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       )}
 
       {/* Title & Slug */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4">
+      <div className="bg-black rounded-xl p-6 shadow-sm border border-emerald-500/30 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-white mb-2">
             Title
             <span className={`ml-2 text-xs ${titleSeoStatus === 'good' ? 'text-emerald-600' : titleSeoStatus === 'warning' ? 'text-amber-600' : 'text-gray-500'}`}>
               ({titleLength} chars {titleLength >= 50 && titleLength <= 60 ? '✓ Optimal' : titleLength > 60 ? '⚠ Too long' : '→ Aim for 50-60'})
@@ -606,12 +682,12 @@ export default function PostEditor({ initialData }: PostEditorProps) {
             type="text"
             value={formData.title}
             onChange={handleTitleChange}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             placeholder="Enter post title"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-white mb-2">
             Slug
           </label>
           <div className="flex gap-2">
@@ -621,13 +697,13 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, slug: e.target.value }))
               }
-              className={`flex-1 px-4 py-2 border ${slugExists ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent`}
+              className={`flex-1 px-4 py-2 border ${slugExists ? 'border-red-500' : 'border-emerald-500/30'} rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent`}
               placeholder="post-url-slug"
             />
             <button
               type="button"
               onClick={handleResetSlug}
-              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 border border-emerald-500/30 transition-colors flex items-center gap-2"
               title="Generate from title"
             >
               <RefreshCw className="h-4 w-4" />
@@ -639,13 +715,13 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               This slug already exists. Choose a unique one.
             </p>
           )}
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+          <p className="text-xs text-emerald-400 mt-1 flex items-center gap-1">
             <LinkIcon className="h-3 w-3" />
             Preview: yourblog.com/blog/{formData.slug || 'your-slug'}
           </p>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-white mb-2">
             Description
             <span className={`ml-2 text-xs ${descSeoStatus === 'good' ? 'text-emerald-600' : descSeoStatus === 'warning' ? 'text-amber-600' : 'text-gray-500'}`}>
               ({descLength} chars {descLength >= 150 && descLength <= 160 ? '✓ Optimal' : descLength > 160 ? '⚠ Too long' : '→ Aim for 150-160'})
@@ -655,22 +731,22 @@ export default function PostEditor({ initialData }: PostEditorProps) {
             value={formData.description}
             onChange={handleDescriptionChange}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+            className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
             placeholder="Brief description for SEO and previews"
           />
         </div>
       </div>
 
       {/* MDX Editor */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-black rounded-xl shadow-sm border border-emerald-500/20 overflow-hidden">
+        <div className="p-4 border-b border-emerald-500/20">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+              <h3 className="text-sm font-medium text-white">
                 Content (MDX Format)
-                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">({contentWordCount} words)</span>
+                <span className="ml-2 text-xs text-emerald-400">({contentWordCount} words)</span>
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-emerald-400 mt-1">
                 Write in Markdown with JSX component support
               </p>
             </div>
@@ -678,7 +754,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               <button
                 type="button"
                 onClick={() => setShowTemplates(true)}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-200 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
               >
                 <FileText className="h-4 w-4" />
                 Templates
@@ -710,10 +786,10 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       </div>
 
       {/* Metadata */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4">
+      <div className="bg-black rounded-xl p-6 shadow-sm border border-emerald-500/20 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Category
             </label>
             <select
@@ -721,7 +797,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, categoryId: e.target.value }))
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             >
               <option value="">Select a category</option>
               {categories.map((cat) => (
@@ -732,11 +808,11 @@ export default function PostEditor({ initialData }: PostEditorProps) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Featured Image
             </label>
             {formData.image ? (
-              <div className="relative rounded-lg overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+              <div className="relative rounded-lg overflow-hidden border-2 border-emerald-500/30">
                 <img
                   src={formData.image}
                   alt="Featured"
@@ -765,7 +841,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               <button
                 type="button"
                 onClick={handleOpenFeaturedImageModal}
-                className="w-full h-48 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors flex flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 bg-gray-50 dark:bg-gray-900/50"
+                className="w-full h-48 border-2 border-dashed border-emerald-500/30 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors flex flex-col items-center justify-center gap-3 text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-400 bg-zinc-900/50"
               >
                 <Upload className="h-8 w-8" />
                 <div className="text-center">
@@ -781,14 +857,14 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, image: e.target.value }))
                 }
-                className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-xs border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 placeholder="Or paste image URL directly"
               />
             </div>
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-white mb-2">
             Tags
           </label>
           <div className="flex flex-wrap gap-2 mb-2">
@@ -816,26 +892,26 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                 onKeyDown={(e) =>
                   e.key === 'Enter' && (e.preventDefault(), handleAddTag())
                 }
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 placeholder="Add a tag (start typing for suggestions)"
               />
               <button
                 type="button"
                 onClick={handleAddTag}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
               >
                 Add
               </button>
             </div>
             {/* Tag suggestions dropdown */}
             {tagSuggestions.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-black border border-emerald-500/30 rounded-lg shadow-lg max-h-40 overflow-y-auto">
                 {tagSuggestions.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => selectTagSuggestion(tag)}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm"
+                    className="w-full px-4 py-2 text-left hover:bg-emerald-500/10 text-white text-sm"
                   >
                     {tag}
                   </button>
@@ -847,20 +923,20 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       </div>
 
       {/* SEO Fields */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-black rounded-xl shadow-sm border border-emerald-500/20 overflow-hidden">
         <button
           onClick={() => setShowSeoFields(!showSeoFields)}
-          className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-700/50"
+          className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-emerald-500/10"
         >
-          <span className="font-medium text-gray-900 dark:text-white">
+          <span className="font-medium text-white">
             SEO Settings
           </span>
           <span className="text-gray-500">{showSeoFields ? '−' : '+'}</span>
         </button>
         {showSeoFields && (
-          <div className="px-6 pb-6 space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+          <div className="px-6 pb-6 space-y-4 border-t border-emerald-500/20 pt-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Meta Title
                 <span className="text-gray-500 font-normal ml-2">
                   ({formData.metaTitle.length}/60)
@@ -873,12 +949,12 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                   setFormData((prev) => ({ ...prev, metaTitle: e.target.value }))
                 }
                 maxLength={60}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 placeholder="Override the default title for search engines"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Meta Description
                 <span className="text-gray-500 font-normal ml-2">
                   ({formData.metaDescription.length}/160)
@@ -894,7 +970,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                 }
                 maxLength={160}
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
                 placeholder="Override the default description for search engines"
               />
             </div>
@@ -903,20 +979,20 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       </div>
 
       {/* Scheduling */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-black rounded-xl shadow-sm border border-emerald-500/20 overflow-hidden">
         <button
           onClick={() => setShowScheduling(!showScheduling)}
-          className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-700/50"
+          className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-emerald-500/10"
         >
-          <span className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+          <span className="font-medium text-white flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             Schedule Post
           </span>
           <span className="text-gray-500">{showScheduling ? '−' : '+'}</span>
         </button>
         {showScheduling && (
-          <div className="px-6 pb-6 border-t border-gray-200 dark:border-gray-700 pt-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="px-6 pb-6 border-t border-emerald-500/20 pt-4">
+            <label className="block text-sm font-medium text-white mb-2">
               Publish Date & Time
             </label>
             <input
@@ -925,7 +1001,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, scheduledAt: e.target.value }))
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
             <p className="text-sm text-gray-500 mt-2">
               Leave empty to publish immediately when you click Publish.
@@ -945,10 +1021,10 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       </div>
 
       {/* Quick Actions - Floating Toolbar */}
-      <div className="sticky bottom-0 z-30 bg-gradient-to-t from-gray-100 dark:from-gray-900 to-transparent pt-8 pb-4">
-        <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border-2 border-gray-200 dark:border-gray-700">
+      <div className="sticky bottom-0 z-30 bg-gradient-to-t from-zinc-950 to-transparent pt-8 pb-4">
+        <div className="flex items-center justify-between bg-black rounded-xl p-4 shadow-lg border-2 border-emerald-500/20">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-2 text-sm text-white">
               {formData.published ? (
                 <>
                   <Eye className="h-4 w-4 text-emerald-500" />
@@ -969,13 +1045,13 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                 </>
               )}
             </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400 border-l border-gray-300 dark:border-gray-600 pl-4">MDX Format • {contentWordCount} words</span>
+            <span className="text-xs text-emerald-400 border-l border-emerald-500/30 pl-4">MDX Format • {contentWordCount} words</span>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={handlePreview}
               disabled={saving || slugExists || !formData.slug}
-              className="px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center gap-2 font-medium"
+              className="px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2 font-medium border border-emerald-500/30"
               title="Preview post in new tab"
             >
               <Eye className="h-4 w-4" />
@@ -984,7 +1060,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
             <button
               onClick={() => handleSubmit(false)}
               disabled={saving || slugExists}
-              className="px-5 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 flex items-center gap-2 font-medium"
+              className="px-5 py-2.5 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors disabled:opacity-50 flex items-center gap-2 font-medium border border-emerald-500/30"
               title="Ctrl+S"
             >
               <Save className="h-4 w-4" />
@@ -1015,8 +1091,8 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       {/* Featured Image Upload Modal */}
       {showFeaturedImageModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+          <div className="bg-black rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4">
+            <h3 className="text-xl font-bold text-white">
               Upload Featured Image
             </h3>
 
@@ -1028,7 +1104,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               className={`border-2 border-dashed rounded-lg p-8 transition-all ${
                 featuredImageData.isDragging
                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
-                  : 'border-gray-300 dark:border-gray-600'
+                  : 'border-emerald-500/30'
               }`}
             >
               {featuredImageData.preview ? (
@@ -1039,7 +1115,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                     className="max-h-64 mx-auto rounded-lg shadow-md"
                   />
                   <div className="flex items-center justify-center">
-                    <label className="cursor-pointer px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium">
+                    <label className="cursor-pointer px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 border border-emerald-500/30 transition-colors text-sm font-medium">
                       Choose Different Image
                       <input
                         type="file"
@@ -1052,11 +1128,11 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center cursor-pointer">
-                  <Upload className="h-12 w-12 text-gray-400 mb-3" />
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <Upload className="h-12 w-12 text-emerald-400 mb-3" />
+                  <p className="text-sm font-medium text-white mb-1">
                     Drop your image here, or click to browse
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-emerald-400">
                     Supports: JPG, PNG, GIF, WebP (Max 10MB)
                   </p>
                   <input
@@ -1090,7 +1166,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                 type="button"
                 onClick={handleCancelFeaturedImage}
                 disabled={uploading}
-                className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -1120,27 +1196,27 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       {/* Image Insert Modal */}
       {showImageModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+          <div className="bg-black rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4">
+            <h3 className="text-xl font-bold text-white">
               Insert Inline Image
             </h3>
 
             {/* File Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Select Image
               </label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageFileSelect}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                className="w-full px-3 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
               />
             </div>
 
             {/* Image Preview */}
             {imageModalData.preview && (
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
+              <div className="border-2 border-dashed border-emerald-500/30 rounded-lg p-4">
                 <img
                   src={imageModalData.preview}
                   alt="Preview"
@@ -1151,7 +1227,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
             {/* Alt Text */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Alt Text <span className="text-red-500">*</span>
               </label>
               <input
@@ -1161,13 +1237,13 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                   setImageModalData((prev) => ({ ...prev, altText: e.target.value }))
                 }
                 placeholder="Describe the image for accessibility"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 
             {/* Variant Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Image Variant
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -1179,7 +1255,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                   className={`px-4 py-2 rounded-lg border-2 transition-all ${
                     imageModalData.variant === 'hero'
                       ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                      : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400'
+                      : 'border-emerald-500/30 text-white hover:border-gray-400'
                   }`}
                 >
                   Hero
@@ -1192,7 +1268,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                   className={`px-4 py-2 rounded-lg border-2 transition-all ${
                     imageModalData.variant === 'section'
                       ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                      : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400'
+                      : 'border-emerald-500/30 text-white hover:border-gray-400'
                   }`}
                 >
                   Section
@@ -1205,13 +1281,13 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                   className={`px-4 py-2 rounded-lg border-2 transition-all ${
                     imageModalData.variant === 'inline'
                       ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                      : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400'
+                      : 'border-emerald-500/30 text-white hover:border-gray-400'
                   }`}
                 >
                   Inline
                 </button>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              <p className="text-xs text-emerald-400 mt-2">
                 Hero: Full-width • Section: Standard • Inline: Small
               </p>
             </div>
@@ -1222,7 +1298,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                 type="button"
                 onClick={handleCancelImageInsert}
                 disabled={uploadingInline}
-                className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -1252,32 +1328,32 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       {/* Templates Modal */}
       {showTemplates && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4">
+          <div className="bg-black rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-xl font-bold text-white">
                 Content Templates
               </h3>
               <button
                 onClick={() => setShowTemplates(false)}
-                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                className="text-emerald-400 hover:text-emerald-300"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
 
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-emerald-400">
               Choose a template to start your post with a pre-structured format.
             </p>
 
             <div className="grid grid-cols-1 gap-3">
               <button
                 onClick={() => applyTemplate('howto')}
-                className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-all text-left group"
+                className="p-4 border-2 border-emerald-500/30 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-all text-left group"
               >
                 <div className="flex items-start gap-3">
                   <FileText className="h-5 w-5 text-emerald-600 mt-1" />
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                    <h4 className="font-medium text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
                       How-To Guide
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -1289,12 +1365,12 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
               <button
                 onClick={() => applyTemplate('listicle')}
-                className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-all text-left group"
+                className="p-4 border-2 border-emerald-500/30 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-all text-left group"
               >
                 <div className="flex items-start gap-3">
                   <FileText className="h-5 w-5 text-emerald-600 mt-1" />
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                    <h4 className="font-medium text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
                       Listicle
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -1306,12 +1382,12 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
               <button
                 onClick={() => applyTemplate('review')}
-                className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-all text-left group"
+                className="p-4 border-2 border-emerald-500/30 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-all text-left group"
               >
                 <div className="flex items-start gap-3">
                   <FileText className="h-5 w-5 text-emerald-600 mt-1" />
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                    <h4 className="font-medium text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
                       Product Review
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -1322,10 +1398,10 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               </button>
             </div>
 
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="pt-4 border-t border-emerald-500/20">
               <button
                 onClick={() => setShowTemplates(false)}
-                className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
               >
                 Cancel
               </button>

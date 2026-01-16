@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "cloudinary.images-iherb.com",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
     ],
     // Prefer modern image formats for better compression
     formats: ["image/avif", "image/webp"],
