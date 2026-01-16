@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -58,13 +58,18 @@ interface PostEditorProps {
 
 export default function PostEditor({ initialData }: PostEditorProps) {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [showSeoFields, setShowSeoFields] = useState(false);
   const [showScheduling, setShowScheduling] = useState(false);
+  const [showFeaturedImageModal, setShowFeaturedImageModal] = useState(false);
+  const [featuredImageData, setFeaturedImageData] = useState({
+    file: null as File | null,
+    preview: '',
+    isDragging: false,
+  });
 
   const [formData, setFormData] = useState<PostData>({
     title: initialData?.title || '',
@@ -167,14 +172,60 @@ export default function PostEditor({ initialData }: PostEditorProps) {
     }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleOpenFeaturedImageModal = () => {
+    setShowFeaturedImageModal(true);
+  };
+
+  const handleFeaturedImageFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFeaturedImageData({
+        file,
+        preview: reader.result as string,
+        isDragging: false,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFeaturedImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setFeaturedImageData((prev) => ({ ...prev, isDragging: false }));
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFeaturedImageData({
+        file,
+        preview: reader.result as string,
+        isDragging: false,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFeaturedImageDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setFeaturedImageData((prev) => ({ ...prev, isDragging: true }));
+  };
+
+  const handleFeaturedImageDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setFeaturedImageData((prev) => ({ ...prev, isDragging: false }));
+  };
+
+  const handleConfirmFeaturedImage = async () => {
+    if (!featuredImageData.file) return;
 
     setUploading(true);
     try {
       const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
+      formDataUpload.append('file', featuredImageData.file);
 
       const res = await fetch('/api/admin/upload', {
         method: 'POST',
@@ -184,14 +235,29 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       if (res.ok) {
         const data = await res.json();
         setFormData((prev) => ({ ...prev, image: data.url }));
+        setShowFeaturedImageModal(false);
+        setFeaturedImageData({
+          file: null,
+          preview: '',
+          isDragging: false,
+        });
       } else {
-        alert('Failed to upload image');
+        alert('Failed to upload image to Cloudinary');
       }
     } catch {
       alert('Error uploading image');
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleCancelFeaturedImage = () => {
+    setShowFeaturedImageModal(false);
+    setFeaturedImageData({
+      file: null,
+      preview: '',
+      isDragging: false,
+    });
   };
 
   const handleEditorImageUpload = async () => {
@@ -504,51 +570,56 @@ export default function PostEditor({ initialData }: PostEditorProps) {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Featured Image
             </label>
-            <div className="flex gap-2">
+            {formData.image ? (
+              <div className="relative rounded-lg overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+                <img
+                  src={formData.image}
+                  alt="Featured"
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 transition-opacity flex items-center justify-center gap-2 opacity-0 hover:opacity-100">
+                  <button
+                    type="button"
+                    onClick={handleOpenFeaturedImageModal}
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Change Image
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, image: '' }))}
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+                  >
+                    <X className="h-4 w-4" />
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleOpenFeaturedImageModal}
+                className="w-full h-48 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors flex flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 bg-gray-50 dark:bg-gray-900/50"
+              >
+                <Upload className="h-8 w-8" />
+                <div className="text-center">
+                  <p className="text-sm font-medium">Upload Featured Image</p>
+                  <p className="text-xs mt-1">Click to browse or drag and drop</p>
+                </div>
+              </button>
+            )}
+            <div className="mt-2">
               <input
                 type="text"
                 value={formData.image}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, image: e.target.value }))
                 }
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="Image URL or upload"
+                className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                placeholder="Or paste image URL directly"
               />
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
-              >
-                {uploading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Upload className="h-4 w-4" />
-                )}
-              </button>
             </div>
-            {formData.image && (
-              <div className="mt-2 relative">
-                <img
-                  src={formData.image}
-                  alt="Featured"
-                  className="w-full h-32 object-cover rounded-lg"
-                />
-                <button
-                  onClick={() => setFormData((prev) => ({ ...prev, image: '' }))}
-                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
           </div>
         </div>
         <div>
@@ -690,6 +761,103 @@ export default function PostEditor({ initialData }: PostEditorProps) {
           </div>
         )}
       </div>
+
+      {/* Featured Image Upload Modal */}
+      {showFeaturedImageModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              Upload Featured Image
+            </h3>
+
+            {/* Drag and Drop Zone */}
+            <div
+              onDrop={handleFeaturedImageDrop}
+              onDragOver={handleFeaturedImageDragOver}
+              onDragLeave={handleFeaturedImageDragLeave}
+              className={`border-2 border-dashed rounded-lg p-8 transition-all ${
+                featuredImageData.isDragging
+                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                  : 'border-gray-300 dark:border-gray-600'
+              }`}
+            >
+              {featuredImageData.preview ? (
+                <div className="space-y-4">
+                  <img
+                    src={featuredImageData.preview}
+                    alt="Preview"
+                    className="max-h-64 mx-auto rounded-lg shadow-md"
+                  />
+                  <div className="flex items-center justify-center">
+                    <label className="cursor-pointer px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium">
+                      Choose Different Image
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFeaturedImageFileSelect}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center cursor-pointer">
+                  <Upload className="h-12 w-12 text-gray-400 mb-3" />
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Drop your image here, or click to browse
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Supports: JPG, PNG, GIF, WebP (Max 10MB)
+                  </p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFeaturedImageFileSelect}
+                    className="hidden"
+                  />
+                </label>
+              )}
+            </div>
+
+            {/* Helper Text */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+              <p className="text-sm text-blue-800 dark:text-blue-300">
+                <strong>Tip:</strong> For best results, use images at least 1200px wide. The featured image appears at the top of your post and in preview cards.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3 pt-4">
+              <button
+                type="button"
+                onClick={handleCancelFeaturedImage}
+                disabled={uploading}
+                className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmFeaturedImage}
+                disabled={!featuredImageData.file || uploading}
+                className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Uploading to Cloud...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4" />
+                    Upload & Set as Featured
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Preview Modal */}
       {showPreview && (
