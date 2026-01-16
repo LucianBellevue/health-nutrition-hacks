@@ -2,8 +2,6 @@
 
 This document outlines the structure, styling, and best practices for creating blog posts that render correctly on the site with minimal revisions.
 
----
-
 ## File Structure
 
 ### Post Location
@@ -30,8 +28,6 @@ public/images/posts/[post-slug]/
 - Optimize before uploading (use Squoosh or similar)
 - **Important:** Ensure file extension matches actual format (check file headers if unsure)
 
----
-
 ## Frontmatter Template
 
 ```yaml
@@ -51,10 +47,19 @@ readingTime: X
 **Notes:**
 
 - Leave `author` and `authorId` empty to use the default HNH Team author
-- `category` must match an existing category (e.g., "Gut Health", "Nutrition Basics")
+- `category` must match an existing category from the list below
 - `readingTime` is estimated minutes to read
 
----
+### Available Categories
+
+| Category | Slug | Description |
+|----------|------|-------------|
+| Energy | `energy` | Evidence-based strategies for sustaining steady energy throughout the day |
+| Gut Health | `gut-health` | Digestive system support, microbiome education, and probiotic-forward tips |
+| Meal Planning | `meal-planning` | Weekly prep methods, grocery tactics, and time-saving kitchen systems |
+| Weight Loss | `weight-loss` | Metabolism-friendly habits and realistic nutrition guidance for weight goals |
+| Heart Health | `heart-health` | Cardiovascular-friendly recipes and nutrient tips for a stronger heart |
+| Mental Wellness | `mental-wellness` | Nutrition, habits, and routines that nurture mood and cognitive balance |
 
 ## Content Structure
 
@@ -65,41 +70,14 @@ readingTime: X
 2. Opening paragraph (hook the reader)
 3. Quick-scan info cards (optional - 3 columns)
 4. Disclaimer (small footnote-style span)
-5. Section divider (---)
-6. Main content sections with H2 headings
-7. Use &nbsp; between ### subsections for visual spacing
-8. Section images between major topics
-9. Product recommendations (ProductCard component)
-10. Section divider (---)
-11. Tips/actionable takeaways
-12. CTA block
-13. Section divider (---)
-14. FAQ section
-15. Section divider (---)
-16. References section (REQUIRED)
+5. Main content sections with H2 headings
+6. Section images between major topics
+7. Product recommendations (ProductCard component)
+8. Tips/actionable takeaways
+9. CTA block
+10. FAQ section
+11. References section (REQUIRED)
 ```
-
-### Heading Spacing
-
-Add `&nbsp;` before each `###` subsection heading to create visual separation:
-
-```mdx
-## Main Section Title
-
-&nbsp;
-
-### 1) First subsection
-
-Content here...
-
-&nbsp;
-
-### 2) Second subsection
-
-Content here...
-```
-
----
 
 ## Images
 
@@ -158,8 +136,6 @@ Use the Next.js `Image` component for images uploaded to Cloudinary or other ext
 
 **Note:** When using the admin editor to upload inline images, they are automatically uploaded to Cloudinary and inserted as `Image` components.
 
----
-
 ## Styled Content Blocks
 
 ### Info Cards (3-Column Grid)
@@ -193,7 +169,7 @@ Use for quick-scan information at the top of posts:
 
 This renders as small, subtle footnote text that doesn't distract from the content.
 
-### Two-Column Tips Grid
+### Two-Column Grid
 
 ```mdx
 <div className="not-prose grid gap-4 md:grid-cols-2">
@@ -211,13 +187,11 @@ This renders as small, subtle footnote text that doesn't distract from the conte
 </div>
 ```
 
----
-
 ## Product Cards
 
 ### Using the ProductCard Component
 
-Use the `ProductCard` component for affiliate product recommendations.
+Use the `ProductCard` component for Amazon affiliate product recommendations.
 
 ```mdx
 <div className="not-prose grid gap-5 md:grid-cols-2">
@@ -230,11 +204,12 @@ Use the `ProductCard` component for affiliate product recommendations.
     image="https://m.media-amazon.com/images/I/71abc123._SL500_.jpg"
   />
   <ProductCard
-    store="iherb"
+    store="amazon"
     title="Budget-friendly option"
     productName="Another Product Name"
-    href="https://www.iherb.com/pr/product-slug/12345"
+    href="https://www.amazon.com/dp/PRODUCT_ID"
     description="Brief description of why this product is recommended."
+    image="https://m.media-amazon.com/images/I/81xyz456._SL500_.jpg"
   />
 </div>
 ```
@@ -243,13 +218,13 @@ Use the `ProductCard` component for affiliate product recommendations.
 
 | Prop          | Required | Description                                                       |
 | ------------- | -------- | ----------------------------------------------------------------- |
-| `store`       | Yes      | `"amazon"` or `"iherb"` - sets badge color and CTA text           |
+| `store`       | Yes      | `"amazon"` - sets badge color and CTA text                        |
 | `title`       | Yes      | Short category/use case title (e.g., "Best for beginners")        |
 | `productName` | Yes      | Full product name                                                 |
-| `href`        | Yes      | Affiliate link URL                                                |
+| `href`        | Yes      | Amazon affiliate link URL                                         |
 | `description` | Yes      | 1-2 sentence description                                          |
 | `image`       | No       | Product image URL (displays 80×80 thumbnail on left side of card) |
-| `cta`         | No       | Custom CTA text (defaults to "View on Amazon/iHerb")              |
+| `cta`         | No       | Custom CTA text (defaults to "View on Amazon")                    |
 
 ### Getting Amazon Product Images
 
@@ -270,11 +245,7 @@ https://m.media-amazon.com/images/I/71xYz123ABC._SL500_.jpg
 
 - Optional thumbnail image (80×80px) on left side when `image` prop is provided
 - Without `image` prop, displays text-only card (still looks great)
-- Amazon = emerald green styling
-- iHerb = teal styling
-- Styled CTA link with hover effects
-
----
+- Emerald green styling with hover effects
 
 ## FAQ Section
 
@@ -299,8 +270,6 @@ Use interactive accordions:
 ```
 
 **Note:** Add `open` to the first `<details>` tag only.
-
----
 
 ## CTA Block
 
@@ -341,8 +310,6 @@ Place before the FAQ section:
 </div>
 ```
 
----
-
 ## References Section
 
 ```mdx
@@ -365,8 +332,6 @@ Place before the FAQ section:
 </div>
 ```
 
----
-
 ## Critical Rules
 
 ### DO:
@@ -377,8 +342,6 @@ Place before the FAQ section:
 - ✅ Test on mobile viewport before publishing
 - ✅ Use semantic HTML (`<article>`, `<section>`, `<details>`)
 - ✅ Include `target="_blank" rel="noopener noreferrer"` on external links
-- ✅ Use `&nbsp;` between subsections for visual spacing
-- ✅ Use `---` section dividers between major sections
 - ✅ Include a References section with source links (REQUIRED)
 - ✅ Use `ProductCard` component for affiliate links (not raw HTML)
 - ✅ Add internal links to related posts using `/blog/[slug]` format
@@ -398,8 +361,6 @@ Place before the FAQ section:
 - ❌ Use blockquotes (`>`) for disclaimers (use styled span)
 - ❌ Use raw HTML for product cards (use ProductCard component)
 - ❌ Use `PostImage` for Cloudinary URLs (use `Image` component instead)
-
----
 
 ## Checklist Before Submission
 
@@ -427,8 +388,6 @@ Place before the FAQ section:
 - [ ] No `{" "}` JSX spacers anywhere
 - [ ] External links have `target="_blank" rel="noopener noreferrer"`
 - [ ] Internal links use `/blog/[slug]` format
-- [ ] `&nbsp;` spacing between `###` subsections
-- [ ] `---` dividers between major sections
 - [ ] ProductCard includes `image` prop when product image is available
 - [ ] Tested locally with `npm run dev` (no hydration errors)
 
