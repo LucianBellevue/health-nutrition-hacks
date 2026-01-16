@@ -28,6 +28,7 @@ const AdSenseInArticle = dynamic(() => import('@/components/AdSenseInArticle'));
 
 // MDX components that can be used in posts
 const components = {
+  Image,
   AffiliateBlock,
   PostImage,
   ProductCard,

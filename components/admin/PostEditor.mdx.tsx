@@ -454,7 +454,8 @@ export default function PostEditor({ initialData }: PostEditorProps) {
         const data = await res.json();
         const imageUrl = data.url;
         
-        const imageComponent = `\n\n<PostImage slug="${formData.slug || 'your-post-slug'}" src="${imageUrl}" alt="${imageModalData.altText || 'Image'}" variant="${imageModalData.variant}" />\n\n`;
+        // Use standard Image component for Cloudinary URLs
+        const imageComponent = `\n\n<Image src="${imageUrl}" alt="${imageModalData.altText || 'Image'}" width={800} height={450} className="rounded-xl my-8" />\n\n`;
         
         setFormData((prev) => ({
           ...prev,
