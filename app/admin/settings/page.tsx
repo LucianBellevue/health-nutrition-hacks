@@ -51,19 +51,19 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-white">
           Settings
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-emerald-400 mt-1">
           Manage your account settings
         </p>
       </div>
 
       {/* Change Password */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="bg-black rounded-xl p-6 shadow-sm border border-emerald-500/30">
         <div className="flex items-center gap-3 mb-6">
-          <Key className="h-5 w-5 text-emerald-600" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <Key className="h-5 w-5 text-emerald-500" />
+          <h2 className="text-lg font-semibold text-white">
             Change Password
           </h2>
         </div>
@@ -82,7 +82,7 @@ export default function AdminSettingsPage() {
 
         <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Current Password
             </label>
             <input
@@ -90,11 +90,11 @@ export default function AdminSettingsPage() {
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               New Password
             </label>
             <input
@@ -103,11 +103,11 @@ export default function AdminSettingsPage() {
               onChange={(e) => setNewPassword(e.target.value)}
               required
               minLength={8}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Confirm New Password
             </label>
             <input
@@ -115,7 +115,7 @@ export default function AdminSettingsPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
           <button

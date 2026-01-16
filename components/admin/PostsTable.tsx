@@ -53,11 +53,11 @@ export default function PostsTable({ posts }: { posts: Post[] }) {
 
   if (posts.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
-        <p className="text-gray-500 dark:text-gray-400">No posts found.</p>
+      <div className="bg-black rounded-xl border border-emerald-500/30 p-12 text-center">
+        <p className="text-emerald-400">No posts found.</p>
         <Link
           href="/admin/posts/new"
-          className="inline-block mt-4 text-emerald-600 dark:text-emerald-400 hover:underline"
+          className="inline-block mt-4 text-emerald-400 hover:text-emerald-300 hover:underline"
         >
           Create your first post
         </Link>
@@ -66,21 +66,21 @@ export default function PostsTable({ posts }: { posts: Post[] }) {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="bg-black rounded-xl border border-emerald-500/30 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 dark:bg-gray-900/50">
+          <thead className="bg-zinc-900/50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-emerald-400 uppercase tracking-wider">
                 Title
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-emerald-400 uppercase tracking-wider">
                 Category
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-emerald-400 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-emerald-400 uppercase tracking-wider">
                 Date
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -88,27 +88,27 @@ export default function PostsTable({ posts }: { posts: Post[] }) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="divide-y divide-emerald-500/20">
             {posts.map((post) => (
               <tr
                 key={post.id}
-                className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                className="hover:bg-emerald-500/10 transition-colors"
               >
                 <td className="px-6 py-4">
                   <div className="flex flex-col">
                     <Link
                       href={`/admin/posts/${post.slug}/edit`}
-                      className="font-medium text-gray-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400"
+                      className="font-medium text-white hover:text-emerald-400"
                     >
                       {post.title}
                     </Link>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="text-sm text-emerald-400">
                       {post.author.name || post.author.email}
                     </span>
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                  <span className="px-2 py-1 text-xs bg-zinc-800 text-white rounded border border-emerald-500/30">
                     {post.category.name}
                   </span>
                 </td>
@@ -123,7 +123,7 @@ export default function PostsTable({ posts }: { posts: Post[] }) {
                     {post.published ? 'Published' : 'Draft'}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                <td className="px-6 py-4 text-sm text-emerald-400">
                   {new Date(post.updatedAt).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4">
@@ -132,7 +132,7 @@ export default function PostsTable({ posts }: { posts: Post[] }) {
                       <Link
                         href={`/blog/${post.slug}`}
                         target="_blank"
-                        className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+                        className="p-2 text-emerald-400 hover:text-emerald-300 transition-colors"
                         title="View post"
                       >
                         <ExternalLink className="h-4 w-4" />
@@ -140,7 +140,7 @@ export default function PostsTable({ posts }: { posts: Post[] }) {
                     )}
                     <Link
                       href={`/admin/posts/${post.slug}/edit`}
-                      className="p-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 transition-colors"
+                      className="p-2 text-emerald-400 hover:text-emerald-300 transition-colors"
                       title="Edit post"
                     >
                       <Edit className="h-4 w-4" />
@@ -148,7 +148,7 @@ export default function PostsTable({ posts }: { posts: Post[] }) {
                     <button
                       onClick={() => handleDelete(post.id, post.title)}
                       disabled={deletingId === post.id}
-                      className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+                      className="p-2 text-emerald-400 hover:text-red-400 transition-colors disabled:opacity-50"
                       title="Delete post"
                     >
                       <Trash2 className="h-4 w-4" />
