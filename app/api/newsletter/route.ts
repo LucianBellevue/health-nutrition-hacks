@@ -30,9 +30,18 @@ export async function POST(request: NextRequest) {
 
     // MailerLite API integration
     const MAILERLITE_API_KEY = process.env.MAILERLITE_API_KEY;
+    const MAILERLITE_GROUP_ID = process.env.MAILERLITE_GROUP_ID;
 
     if (!MAILERLITE_API_KEY) {
       console.error('MailerLite API key not configured');
+      return NextResponse.json(
+        { success: false, error: 'Newsletter service not configured' },
+        { status: 500 }
+      );
+    }
+
+    if (!MAILERLITE_GROUP_ID) {
+      console.error('MailerLite group ID not configured');
       return NextResponse.json(
         { success: false, error: 'Newsletter service not configured' },
         { status: 500 }
@@ -48,6 +57,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         email,
+        groups: [MAILERLITE_GROUP_ID],
       }),
     });
 
