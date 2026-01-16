@@ -104,6 +104,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       }
     }
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const editor = useEditor({
