@@ -7,11 +7,13 @@ This document outlines the structure, styling, and best practices for creating b
 ## File Structure
 
 ### Post Location
+
 ```
 content/posts/[post-slug].mdx
 ```
 
 ### Image Location
+
 ```
 public/images/posts/[post-slug]/
 ├── hero.webp        (required - used for OG image + hero)
@@ -21,6 +23,7 @@ public/images/posts/[post-slug]/
 ```
 
 **Image Requirements:**
+
 - Format: `.webp` or `.jpg` (webp preferred for compression)
 - Hero image: 1200×630px minimum (16:8 aspect ratio)
 - Section images: 1600×900px recommended (16:9 aspect ratio)
@@ -39,18 +42,14 @@ date: "YYYY-MM-DD"
 author: ""
 authorId: ""
 category: "Category Name"
-tags:
-  [
-    "primary keyword",
-    "secondary keyword",
-    "related term",
-  ]
+tags: ["primary keyword", "secondary keyword", "related term"]
 image: "/images/posts/[post-slug]/hero.webp"
 readingTime: X
 ---
 ```
 
 **Notes:**
+
 - Leave `author` and `authorId` empty to use the default HNH Team author
 - `category` must match an existing category (e.g., "Gut Health", "Nutrition Basics")
 - `readingTime` is estimated minutes to read
@@ -104,16 +103,18 @@ Content here...
 
 ## Images
 
-### Using the PostImage Component
+There are **two ways** to add images depending on where the image is stored:
 
-**DO NOT** use raw `<img>` tags. Use the `PostImage` component:
+### Option 1: PostImage Component (Local Images)
+
+Use `PostImage` for images stored locally in `/public/images/posts/[slug]/`:
 
 ```mdx
-<PostImage 
-  slug="your-post-slug" 
-  src="image-name.webp" 
-  alt="Descriptive alt text for accessibility" 
-  variant="hero" 
+<PostImage
+  slug="your-post-slug"
+  src="image-name.webp"
+  alt="Descriptive alt text for accessibility"
+  variant="hero"
 />
 ```
 
@@ -125,14 +126,37 @@ Content here...
 | `inline` | Smaller inline images | 16:9 |
 
 **Example:**
+
 ```mdx
-<PostImage 
-  slug="best-probiotic-for-women-gut-health" 
-  src="smoothie.webp" 
-  alt="Woman mixing a green probiotic smoothie at home" 
-  variant="section" 
+<PostImage
+  slug="best-probiotic-for-women-gut-health"
+  src="smoothie.webp"
+  alt="Woman mixing a green probiotic smoothie at home"
+  variant="section"
 />
 ```
+
+### Option 2: Image Component (Cloudinary/External URLs)
+
+Use the Next.js `Image` component for images uploaded to Cloudinary or other external URLs:
+
+```mdx
+<Image
+  src="https://res.cloudinary.com/your-cloud/image/upload/v123/image.jpg"
+  alt="Descriptive alt text"
+  width={800}
+  height={450}
+  className="rounded-xl my-8"
+/>
+```
+
+**When to use which:**
+| Component | Use When | Example Source |
+|-----------|----------|----------------|
+| `PostImage` | Image is in `/public/images/posts/[slug]/` | `src="hero.webp"` |
+| `Image` | Image is hosted on Cloudinary or external URL | `src="https://res.cloudinary.com/..."` |
+
+**Note:** When using the admin editor to upload inline images, they are automatically uploaded to Cloudinary and inserted as `Image` components.
 
 ---
 
@@ -162,7 +186,8 @@ Use for quick-scan information at the top of posts:
 
 ```mdx
 <span className="block text-xs text-zinc-500 dark:text-zinc-400 italic mt-6 mb-8">
-  Friendly reminder: This article is educational and not medical advice. If you have persistent symptoms, speak with a qualified professional.
+  Friendly reminder: This article is educational and not medical advice. If you
+  have persistent symptoms, speak with a qualified professional.
 </span>
 ```
 
@@ -192,7 +217,7 @@ This renders as small, subtle footnote text that doesn't distract from the conte
 
 ### Using the ProductCard Component
 
-Use the `ProductCard` component for affiliate product recommendations. It automatically fetches the product image from the link's Open Graph metadata.
+Use the `ProductCard` component for affiliate product recommendations.
 
 ```mdx
 <div className="not-prose grid gap-5 md:grid-cols-2">
@@ -202,6 +227,7 @@ Use the `ProductCard` component for affiliate product recommendations. It automa
     productName="Product Name Here"
     href="https://www.amazon.com/dp/PRODUCT_ID"
     description="Brief description of why this product is recommended."
+    image="https://m.media-amazon.com/images/I/71abc123._SL500_.jpg"
   />
   <ProductCard
     store="iherb"
@@ -215,21 +241,38 @@ Use the `ProductCard` component for affiliate product recommendations. It automa
 
 **Props:**
 
-| Prop | Required | Description |
-|------|----------|-------------|
-| `store` | Yes | `"amazon"` or `"iherb"` - sets badge color and CTA text |
-| `title` | Yes | Short category/use case title (e.g., "Best for beginners") |
-| `productName` | Yes | Full product name |
-| `href` | Yes | Affiliate link URL |
-| `description` | Yes | 1-2 sentence description |
-| `image` | No | Optional manual image URL (auto-fetched if omitted) |
-| `cta` | No | Custom CTA text (defaults to "View on Amazon/iHerb") |
+| Prop          | Required | Description                                                       |
+| ------------- | -------- | ----------------------------------------------------------------- |
+| `store`       | Yes      | `"amazon"` or `"iherb"` - sets badge color and CTA text           |
+| `title`       | Yes      | Short category/use case title (e.g., "Best for beginners")        |
+| `productName` | Yes      | Full product name                                                 |
+| `href`        | Yes      | Affiliate link URL                                                |
+| `description` | Yes      | 1-2 sentence description                                          |
+| `image`       | No       | Product image URL (displays 80×80 thumbnail on left side of card) |
+| `cta`         | No       | Custom CTA text (defaults to "View on Amazon/iHerb")              |
+
+### Getting Amazon Product Images
+
+To include a product thumbnail:
+
+1. Go to the product page on Amazon
+2. Right-click the main product image
+3. Select "Copy image address"
+4. Paste the URL in the `image` prop
+
+**Example Amazon image URL:**
+
+```
+https://m.media-amazon.com/images/I/71xYz123ABC._SL500_.jpg
+```
 
 **Features:**
-- Auto-fetches product image from link's OG metadata
-- Styled CTA button with hover effects
+
+- Optional thumbnail image (80×80px) on left side when `image` prop is provided
+- Without `image` prop, displays text-only card (still looks great)
 - Amazon = emerald green styling
 - iHerb = teal styling
+- Styled CTA link with hover effects
 
 ---
 
@@ -327,6 +370,7 @@ Place before the FAQ section:
 ## Critical Rules
 
 ### DO:
+
 - ✅ Use `<span className="block">` instead of `<p>` inside custom divs (prevents hydration errors)
 - ✅ Always include `alt` text for images
 - ✅ Use the `not-prose` class on custom styled blocks
@@ -338,23 +382,29 @@ Place before the FAQ section:
 - ✅ Include a References section with source links (REQUIRED)
 - ✅ Use `ProductCard` component for affiliate links (not raw HTML)
 - ✅ Add internal links to related posts using `/blog/[slug]` format
+- ✅ Use `PostImage` for local images in `/public/images/posts/[slug]/`
+- ✅ Use `Image` component for Cloudinary/external URLs
+- ✅ Include product images in `ProductCard` when available (use `image` prop)
 
 ### DON'T:
+
 - ❌ Use `<p>` tags inside `not-prose` divs (causes hydration errors)
-- ❌ Use raw `<img>` tags (use `PostImage` component)
+- ❌ Use raw `<img>` tags (use `PostImage` or `Image` component)
 - ❌ Use `bg-gradient-to-*` (use `bg-linear-to-*` instead)
-- ❌ Hardcode image paths (use the slug-based convention)
+- ❌ Hardcode image paths (use the slug-based convention for local, full URL for external)
 - ❌ Skip the frontmatter image field
 - ❌ Use emojis unless specifically requested
 - ❌ Use `{" "}` JSX spacers (causes rendering issues)
 - ❌ Use blockquotes (`>`) for disclaimers (use styled span)
 - ❌ Use raw HTML for product cards (use ProductCard component)
+- ❌ Use `PostImage` for Cloudinary URLs (use `Image` component instead)
 
 ---
 
 ## Checklist Before Submission
 
 ### Required Elements
+
 - [ ] Frontmatter complete with all required fields
 - [ ] Hero image (PostImage with variant="hero")
 - [ ] Opening paragraph
@@ -367,18 +417,23 @@ Place before the FAQ section:
 - [ ] References section with numbered source links (REQUIRED)
 
 ### Technical Checks
-- [ ] Images added to `public/images/posts/[slug]/`
+
+- [ ] Local images added to `public/images/posts/[slug]/`
 - [ ] Hero image is 1200×630px or larger
-- [ ] All images use `PostImage` component (no raw `<img>` tags)
+- [ ] Local images use `PostImage` component
+- [ ] Cloudinary/external images use `Image` component with width/height
+- [ ] No raw `<img>` tags anywhere
 - [ ] No `<p>` tags inside custom divs (use `<span className="block">`)
 - [ ] No `{" "}` JSX spacers anywhere
 - [ ] External links have `target="_blank" rel="noopener noreferrer"`
 - [ ] Internal links use `/blog/[slug]` format
 - [ ] `&nbsp;` spacing between `###` subsections
 - [ ] `---` dividers between major sections
+- [ ] ProductCard includes `image` prop when product image is available
 - [ ] Tested locally with `npm run dev` (no hydration errors)
 
 ### Content Quality
+
 - [ ] Claims backed by numbered citations [1], [2], etc.
 - [ ] References link to reputable sources (NIH, Harvard, Mayo Clinic, etc.)
 - [ ] Related reading links to other blog posts

@@ -9,15 +9,19 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "m.media-amazon.com",
-      },
-      {
-        protocol: "https",
         hostname: "cloudinary.images-iherb.com",
       },
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "m.media-amazon.com",
+      },
+      {
+        protocol: "https",
+        hostname: "ws-na.amazon-adsystem.com",
       },
     ],
     // Prefer modern image formats for better compression

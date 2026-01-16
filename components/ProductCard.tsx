@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 interface ProductCardProps {
   store: 'amazon' | 'iherb';
   title: string;
@@ -5,6 +7,7 @@ interface ProductCardProps {
   href: string;
   description: string;
   cta?: string;
+  image?: string;
 }
 
 /**
@@ -18,6 +21,7 @@ interface ProductCardProps {
  *   href="https://amazon.com/..."
  *   description="A simple foundation supplement..."
  *   cta="Check price on Amazon"
+ *   image="https://m.media-amazon.com/images/I/71abc123._SL500_.jpg"
  * />
  */
 export default function ProductCard({
@@ -27,6 +31,7 @@ export default function ProductCard({
   href,
   description,
   cta,
+  image,
 }: ProductCardProps) {
   const isAmazon = store === 'amazon';
   
@@ -48,14 +53,26 @@ export default function ProductCard({
 
   return (
     <article className="group rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/70 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      <div className="p-4">
-        <div>
+      <div className={`p-4 ${image ? 'flex gap-4' : ''}`}>
+        {image && (
+          <div className="shrink-0">
+            <Image
+              src={image}
+              alt={productName}
+              width={80}
+              height={80}
+              className="rounded-lg object-contain bg-white"
+              unoptimized
+            />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className={`text-[10px] uppercase tracking-[0.2em] ${styles.badge} font-semibold`}>
               {isAmazon ? 'Amazon' : 'iHerb'}
             </span>
             <span className="text-zinc-300 dark:text-zinc-600">•</span>
-            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 leading-snug">
+            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 leading-snug truncate">
               {title}
             </h4>
           </div>
@@ -65,18 +82,18 @@ export default function ProductCard({
           <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1.5 leading-relaxed line-clamp-2">
             {description}
           </p>
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`inline-flex items-center gap-1.5 mt-3 text-xs font-semibold ${styles.badge} hover:underline`}
+          >
+            {cta || defaultCta}
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
         </div>
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`inline-flex items-center gap-1.5 mt-3 text-xs font-semibold ${styles.badge} hover:underline`}
-        >
-          {cta || defaultCta}
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </a>
       </div>
     </article>
   );
