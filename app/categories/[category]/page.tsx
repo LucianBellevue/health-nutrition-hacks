@@ -9,7 +9,6 @@ import Link from 'next/link';
 const POSTS_PER_PAGE = 9;
 
 const SITE_URL = 'https://www.healthnutritionhacks.com';
-const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -39,6 +38,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const ogImage = `${SITE_URL}/api/og?title=${encodeURIComponent(category.name)}&category=${encodeURIComponent(category.name)}&author=HNH Team`;
+
   return {
     title: `${category.name} – Health Nutrition Hacks`,
     description: `Browse all ${category.name.toLowerCase()} posts. ${category.count} articles about ${category.name.toLowerCase()}.`,
@@ -51,20 +52,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `${SITE_URL}/categories/${categorySlug}`,
       siteName: 'Health Nutrition Hacks',
       type: 'website',
+      locale: 'en_US',
       images: [
         {
-          url: OG_IMAGE,
-          width: 512,
-          height: 512,
-          alt: 'Health Nutrition Hacks',
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${category.name} - Health Nutrition Hacks`,
+          type: 'image/png',
         },
       ],
     },
     twitter: {
-      card: 'summary',
+      card: 'summary_large_image',
       title: `${category.name} – Health Nutrition Hacks`,
       description: `Browse all ${category.name.toLowerCase()} posts. ${category.count} articles about ${category.name.toLowerCase()}.`,
-      images: [OG_IMAGE],
+      site: '@healthnutritionhacks',
+      creator: '@healthnutritionhacks',
+      images: [ogImage],
     },
   };
 }

@@ -15,6 +15,7 @@ const AdSenseMultiplex = dynamic(() => import('@/components/AdSenseMultiplex'));
 const POSTS_PER_PAGE = 9;
 
 const SITE_URL = 'https://www.healthnutritionhacks.com';
+const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent('Nutrition Blog - Latest Articles')}&category=Blog&author=HNH Team`;
 
 export const metadata: Metadata = {
   title: 'Nutrition Blog – Health Nutrition Hacks',
@@ -28,12 +29,14 @@ export const metadata: Metadata = {
     type: 'website',
     url: `${SITE_URL}/blog`,
     siteName: 'Health Nutrition Hacks',
+    locale: 'en_US',
     images: [
       {
-        url: `${SITE_URL}/android-chrome-512x512.png`,
-        width: 512,
-        height: 512,
-        alt: 'Health Nutrition Hacks',
+        url: OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: 'Health Nutrition Hacks Blog',
+        type: 'image/png',
       },
     ],
   },
@@ -41,7 +44,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Nutrition Blog – Health Nutrition Hacks',
     description: 'Discover evidence-based nutrition tips, healthy recipes, and wellness advice from our expert team.',
-    images: [`${SITE_URL}/android-chrome-512x512.png`],
+    site: '@healthnutritionhacks',
+    creator: '@healthnutritionhacks',
+    images: [OG_IMAGE],
   },
 };
 

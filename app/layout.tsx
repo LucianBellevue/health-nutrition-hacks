@@ -25,7 +25,7 @@ const montserrat = Montserrat({
   fallback: ["system-ui", "-apple-system", "sans-serif"],
 });
 
-const OG_IMAGE = "/android-chrome-512x512.png";
+const OG_IMAGE = `https://www.healthnutritionhacks.com/api/og?title=${encodeURIComponent("Evidence-Based Nutrition Tips & Healthy Recipes")}&category=Health&author=HNH Team`;
 const SITE_URL = "https://www.healthnutritionhacks.com";
 
 export const metadata: Metadata = {
@@ -39,14 +39,16 @@ export const metadata: Metadata = {
     title: "Health Nutrition Hacks – Evidence-Based Nutrition Tips & Healthy Recipes",
     description: "Evidence-based nutrition tips, healthy recipes, and actionable wellness guidance.",
     type: "website",
-    url: "/",
+    url: SITE_URL,
     siteName: "Health Nutrition Hacks",
+    locale: "en_US",
     images: [
       {
         url: OG_IMAGE,
-        width: 512,
-        height: 512,
-        alt: "Health Nutrition Hacks logo",
+        width: 1200,
+        height: 630,
+        alt: "Health Nutrition Hacks - Evidence-Based Nutrition",
+        type: "image/png",
       },
     ],
   },
@@ -54,6 +56,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Health Nutrition Hacks – Evidence-Based Nutrition Tips & Healthy Recipes",
     description: "Evidence-based nutrition tips, healthy recipes, and actionable wellness guidance.",
+    site: "@healthnutritionhacks",
+    creator: "@healthnutritionhacks",
     images: [OG_IMAGE],
   },
   other: {

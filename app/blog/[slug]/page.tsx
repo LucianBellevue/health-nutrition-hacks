@@ -79,17 +79,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return { title: 'Post Not Found – Health Nutrition Hacks' };
     }
 
-    const imageUrl = post.image 
-      ? `${SITE_URL}${post.image.startsWith('/') ? '' : '/'}${post.image}`
-      : `${SITE_URL}/android-chrome-512x512.png`;
-
     const metaTitle = post.metaTitle || post.title;
     const metaDescription = post.metaDescription || post.description;
+    
+    // Use post image if available, otherwise generate dynamic OG image
+    const imageUrl = post.image 
+      ? `${SITE_URL}${post.image.startsWith('/') ? '' : '/'}${post.image}`
+      : `${SITE_URL}/api/og?title=${encodeURIComponent(post.title)}&category=${encodeURIComponent(post.category.name)}&author=${encodeURIComponent(post.author.name || 'HNH Team')}`;
 
     return {
       metadataBase: new URL(SITE_URL),
       title: `${metaTitle} – Health Nutrition Hacks`,
       description: metaDescription,
+      keywords: post.tags,
       authors: post.author.name ? [{ name: post.author.name }] : undefined,
       alternates: {
         canonical: `/blog/${slug}`,
@@ -101,13 +103,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         url: `${SITE_URL}/blog/${slug}`,
         siteName: 'Health Nutrition Hacks',
         publishedTime: post.createdAt.toISOString(),
+        modifiedTime: post.updatedAt.toISOString(),
         authors: post.author.name ? [post.author.name] : undefined,
+        tags: post.tags,
         images: [
           {
             url: imageUrl,
             width: 1200,
             height: 630,
             alt: post.title,
+            type: 'image/png',
           },
         ],
       },
@@ -115,14 +120,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: 'summary_large_image',
         title: metaTitle,
         description: metaDescription,
-        images: [
-          {
-            url: imageUrl,
-            width: 1200,
-            height: 630,
-            alt: post.title,
-          },
-        ],
+        site: '@healthnutritionhacks',
+        creator: '@healthnutritionhacks',
+        images: [imageUrl],
       },
     };
   } catch {

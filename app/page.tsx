@@ -4,7 +4,7 @@ import { getRecentPosts } from "@/lib/posts";
 import PostCard from "@/components/PostCard";
 
 const SITE_URL = "https://www.healthnutritionhacks.com";
-const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
+const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent("Evidence-Based Wellness Tips & Meal Prep Guides")}&category=Health&author=HNH Team`;
 
 export const metadata: Metadata = {
   title: "Health Nutrition Hacks | Evidence-Based Wellness Tips & Meal Prep Guides",
@@ -27,12 +27,14 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: "Health Nutrition Hacks",
     type: "website",
+    locale: "en_US",
     images: [
       {
         url: OG_IMAGE,
-        width: 512,
-        height: 512,
-        alt: "Health Nutrition Hacks",
+        width: 1200,
+        height: 630,
+        alt: "Health Nutrition Hacks - Evidence-Based Wellness",
+        type: "image/png",
       },
     ],
   },
@@ -41,6 +43,8 @@ export const metadata: Metadata = {
     title: "Health Nutrition Hacks | Evidence-Based Wellness Tips & Meal Prep Guides",
     description:
       "Discover research-backed nutrition guidance, sustainable meal prep routines, and realistic wellness strategies tailored for busy, health-minded people.",
+    site: "@healthnutritionhacks",
+    creator: "@healthnutritionhacks",
     images: [OG_IMAGE],
   },
 };
