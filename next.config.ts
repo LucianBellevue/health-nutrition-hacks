@@ -50,6 +50,22 @@ const nextConfig: NextConfig = {
     // Inline critical CSS to reduce render-blocking
     optimizeCss: true,
   },
+  // Redirects for SEO consistency
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "healthnutritionhacks.com",
+          },
+        ],
+        destination: "https://www.healthnutritionhacks.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   // Cache headers for static assets
   async headers() {
     return [
