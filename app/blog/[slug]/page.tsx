@@ -169,6 +169,37 @@ export default async function PostPage({ params }: Props) {
     day: 'numeric',
   });
 
+  // Article structured data for SEO
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.description,
+    image: post.image ? `${SITE_URL}${post.image}` : `${SITE_URL}/api/og?title=${encodeURIComponent(post.title)}&category=${encodeURIComponent(post.category.name)}&author=${encodeURIComponent(author.name)}`,
+    datePublished: post.createdAt.toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    author: {
+      '@type': 'Person',
+      name: author.name,
+      url: author.social?.website,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Health Nutrition Hacks',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/hnh_logo.svg`,
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/blog/${slug}`,
+    },
+    keywords: post.tags.join(', '),
+    articleSection: post.category.name,
+    wordCount: post.content.split(/\s+/).length,
+  };
+
   return (
     <article className="min-h-screen bg-white dark:bg-zinc-950">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -289,6 +320,12 @@ export default async function PostPage({ params }: Props) {
           </div>
         </footer>
       </div>
+
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
     </article>
   );
 }
