@@ -55,7 +55,7 @@ export default function AuthorBox({ author }: AuthorBoxProps) {
 
             <div className="flex flex-col gap-1">
               <h3 className="text-2xl md:text-3xl font-semibold text-zinc-900 dark:text-zinc-50 leading-snug">
-                {isDefaultAuthor ? "Health Nutrition Hacks Team" : author.name}
+                {isDefaultAuthor ? "Health Nutrition Hacks Editorial Team" : author.name}
               </h3>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 {isDefaultAuthor

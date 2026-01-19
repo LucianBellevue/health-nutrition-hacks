@@ -71,7 +71,7 @@ export function getAuthorByIdOrDefault(id: string): Author {
   // Default author if ID not found
   return {
     id: 'default',
-    name: 'Health Nutrition Hacks Team',
+    name: 'Health Nutrition Hacks Editorial Team',
     bio: 'Our team of nutrition experts and health professionals dedicated to bringing you evidence-based nutrition advice.',
     avatarUrl: '/hnh_logo.svg',
   };

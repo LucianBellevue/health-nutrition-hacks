@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   description:
     "Discover science-backed nutrition advice, healthy recipes, and wellness tips to optimize your health and well-being.",
   keywords: ["nutrition", "health", "wellness", "healthy recipes", "diet tips", "nutrition science"],
-  authors: [{ name: "Health Nutrition Hacks Team" }],
+  authors: [{ name: "Health Nutrition Hacks Editorial Team" }],
   openGraph: {
     title: "Health Nutrition Hacks – Evidence-Based Nutrition Tips & Healthy Recipes",
     description: "Evidence-based nutrition tips, healthy recipes, and actionable wellness guidance.",
