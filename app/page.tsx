@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getRecentPosts } from "@/lib/posts";
+import { getRecentPosts } from "@/lib/db-posts";
 import PostCard from "@/components/PostCard";
 
 const SITE_URL = "https://www.healthnutritionhacks.com";
@@ -63,8 +63,8 @@ const structuredData = {
     "Evidence-based nutrition hacks, metabolic health strategies, and realistic wellness guidance for busy people.",
 };
 
-export default function Home() {
-  const recentPosts = getRecentPosts(3);
+export default async function Home() {
+  const recentPosts = await getRecentPosts(3);
 
   return (
     <div className="bg-linear-to-b from-emerald-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">

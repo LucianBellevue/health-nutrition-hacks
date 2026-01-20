@@ -79,6 +79,8 @@ export default function RootLayout({
           .dark{--background:#09090b;--foreground:#fafafa}
           body{background:var(--background);color:var(--foreground)}
         `}} />
+        {/* RSS Feed discovery */}
+        <link rel="alternate" type="application/rss+xml" title="Health Nutrition Hacks RSS Feed" href="https://www.healthnutritionhacks.com/rss.xml" />
         {/* Preconnect to AdSense */}
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />

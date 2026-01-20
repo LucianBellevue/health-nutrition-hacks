@@ -4,7 +4,7 @@ import { getAllCategories, normalizeCategoryToSlug } from "@/lib/db-posts";
 import { CATEGORY_CATALOG } from "@/lib/categoryConfig";
 
 const SITE_URL = 'https://www.healthnutritionhacks.com';
-const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
+const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent('Browse All Categories')}&category=Categories&author=HNH Team`;
 
 export const metadata: Metadata = {
   title: 'Categories – Health Nutrition Hacks',
@@ -21,16 +21,19 @@ export const metadata: Metadata = {
     images: [
       {
         url: OG_IMAGE,
-        width: 512,
-        height: 512,
-        alt: 'Health Nutrition Hacks',
+        width: 1200,
+        height: 630,
+        alt: 'Health Nutrition Hacks Categories',
+        type: 'image/png',
       },
     ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Categories – Health Nutrition Hacks',
     description: 'Browse all categories of nutrition and health topics.',
+    site: '@healthnutritionhacks',
+    creator: '@healthnutritionhacks',
     images: [OG_IMAGE],
   },
 };
