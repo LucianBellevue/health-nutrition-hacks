@@ -25,8 +25,9 @@ const montserrat = Montserrat({
   fallback: ["system-ui", "-apple-system", "sans-serif"],
 });
 
-const OG_IMAGE = `https://www.healthnutritionhacks.com/api/og?title=${encodeURIComponent("Evidence-Based Nutrition Tips & Healthy Recipes")}&category=Health&author=HNH Team`;
 const SITE_URL = "https://www.healthnutritionhacks.com";
+const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent("Evidence-Based Nutrition Tips & Healthy Recipes")}&category=Health&author=HNH Team`;
+const OG_LOGO = `${SITE_URL}/og-logo.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -35,6 +36,21 @@ export const metadata: Metadata = {
     "Discover science-backed nutrition advice, healthy recipes, and wellness tips to optimize your health and well-being.",
   keywords: ["nutrition", "health", "wellness", "healthy recipes", "diet tips", "nutrition science"],
   authors: [{ name: "Health Nutrition Hacks Editorial Team" }],
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      { rel: "icon", url: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+      { rel: "icon", url: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+  },
   openGraph: {
     title: "Health Nutrition Hacks – Evidence-Based Nutrition Tips & Healthy Recipes",
     description: "Evidence-based nutrition tips, healthy recipes, and actionable wellness guidance.",
@@ -50,6 +66,13 @@ export const metadata: Metadata = {
         alt: "Health Nutrition Hacks - Evidence-Based Nutrition",
         type: "image/png",
       },
+      {
+        url: OG_LOGO,
+        width: 1200,
+        height: 630,
+        alt: "Health Nutrition Hacks Logo",
+        type: "image/png",
+      },
     ],
   },
   twitter: {
@@ -59,6 +82,9 @@ export const metadata: Metadata = {
     site: "@healthnutritionhacks",
     creator: "@healthnutritionhacks",
     images: [OG_IMAGE],
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
   other: {
     "google-adsense-account": "ca-pub-6330166847282337",

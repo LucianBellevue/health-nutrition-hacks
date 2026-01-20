@@ -49,18 +49,55 @@ export const metadata: Metadata = {
   },
 };
 
-const structuredData = {
+const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Health Nutrition Hacks",
   url: "https://www.healthnutritionhacks.com/",
-  logo: "https://www.healthnutritionhacks.com/hnh_logo.svg",
+  logo: {
+    "@type": "ImageObject",
+    url: "https://www.healthnutritionhacks.com/logo-512.png",
+    width: 512,
+    height: 512,
+  },
+  image: "https://www.healthnutritionhacks.com/og-logo.png",
   sameAs: [
     "https://www.instagram.com/healthnutritionhacks",
     "https://www.pinterest.com/healthnutritionhacks",
+    "https://twitter.com/healthnutritionhacks",
   ],
   description:
     "Evidence-based nutrition hacks, metabolic health strategies, and realistic wellness guidance for busy people.",
+  foundingDate: "2024",
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "Customer Service",
+    url: "https://www.healthnutritionhacks.com/contact",
+  },
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Health Nutrition Hacks",
+  url: "https://www.healthnutritionhacks.com",
+  description: "Evidence-based nutrition tips, healthy recipes, and wellness guidance for busy people.",
+  publisher: {
+    "@type": "Organization",
+    name: "Health Nutrition Hacks",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://www.healthnutritionhacks.com/logo-512.png",
+    },
+  },
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://www.healthnutritionhacks.com/blog?search={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
+  },
 };
 
 export default async function Home() {
@@ -297,7 +334,11 @@ export default async function Home() {
       </section>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
       />
     </div>
   );

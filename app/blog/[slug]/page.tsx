@@ -102,6 +102,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         type: 'article',
         url: `${SITE_URL}/blog/${slug}`,
         siteName: 'Health Nutrition Hacks',
+        locale: 'en_US',
         publishedTime: post.createdAt.toISOString(),
         modifiedTime: post.updatedAt.toISOString(),
         authors: post.author.name ? [post.author.name] : undefined,
