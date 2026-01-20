@@ -79,8 +79,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Health Nutrition Hacks – Evidence-Based Nutrition Tips & Healthy Recipes",
     description: "Evidence-based nutrition tips, healthy recipes, and actionable wellness guidance.",
-    site: "@healthnutritionhacks",
-    creator: "@healthnutritionhacks",
     images: [OG_IMAGE],
   },
   verification: {

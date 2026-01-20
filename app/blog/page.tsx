@@ -44,8 +44,6 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Nutrition Blog – Health Nutrition Hacks',
     description: 'Discover evidence-based nutrition tips, healthy recipes, and wellness advice from our expert team.',
-    site: '@healthnutritionhacks',
-    creator: '@healthnutritionhacks',
     images: [OG_IMAGE],
   },
 };

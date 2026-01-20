@@ -50,9 +50,8 @@ const organizationSchema = {
   description:
     'Evidence-based nutrition hacks, metabolic health strategies, and realistic wellness guidance for busy people.',
   sameAs: [
-    'https://www.instagram.com/healthnutritionhacks',
+    'https://www.facebook.com/profile.php?id=61586863918949',
     'https://www.pinterest.com/healthnutritionhacks',
-    'https://twitter.com/healthnutritionhacks',
     'https://www.linkedin.com/company/health-nutrition-hacks',
   ],
   contactPoint: {

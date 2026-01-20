@@ -121,8 +121,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: 'summary_large_image',
         title: metaTitle,
         description: metaDescription,
-        site: '@healthnutritionhacks',
-        creator: '@healthnutritionhacks',
         images: [imageUrl],
       },
     };
