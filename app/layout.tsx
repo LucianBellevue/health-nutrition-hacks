@@ -25,7 +25,7 @@ const montserrat = Montserrat({
   fallback: ["system-ui", "-apple-system", "sans-serif"],
 });
 
-const SITE_URL = "https://www.healthnutritionhacks.com";
+const SITE_URL = "https://healthnutritionhacks.com";
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent("Evidence-Based Nutrition Tips & Healthy Recipes")}&category=Health&author=HNH Team`;
 const OG_LOGO = `${SITE_URL}/og-logo.png`;
 
@@ -104,7 +104,7 @@ export default function RootLayout({
           body{background:var(--background);color:var(--foreground)}
         `}} />
         {/* RSS Feed discovery */}
-        <link rel="alternate" type="application/rss+xml" title="Health Nutrition Hacks RSS Feed" href="https://www.healthnutritionhacks.com/rss.xml" />
+        <link rel="alternate" type="application/rss+xml" title="Health Nutrition Hacks RSS Feed" href="https://healthnutritionhacks.com/rss.xml" />
         {/* Preconnect to AdSense */}
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />

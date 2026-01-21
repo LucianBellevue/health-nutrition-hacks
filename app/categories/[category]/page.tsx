@@ -8,7 +8,7 @@ import Link from 'next/link';
 // Posts per page for category pages
 const POSTS_PER_PAGE = 9;
 
-const SITE_URL = 'https://www.healthnutritionhacks.com';
+const SITE_URL = 'https://healthnutritionhacks.com';
 
 interface Props {
   params: Promise<{ category: string }>;

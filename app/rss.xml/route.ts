@@ -2,7 +2,7 @@ import { getAllPosts } from '@/lib/db-posts';
 
 export async function GET() {
   const posts = await getAllPosts();
-  const siteUrl = 'https://www.healthnutritionhacks.com';
+  const siteUrl = 'https://healthnutritionhacks.com';
 
   const rssItems = posts
     .map((post) => {

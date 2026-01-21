@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { getAllPosts, getAllCategories } from '@/lib/db-posts';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = 'https://www.healthnutritionhacks.com';
+  const siteUrl = 'https://healthnutritionhacks.com';
   const posts = await getAllPosts();
   const categories = await getAllCategories();
 

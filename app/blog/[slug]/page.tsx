@@ -47,7 +47,7 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-const SITE_URL = 'https://www.healthnutritionhacks.com';
+const SITE_URL = 'https://healthnutritionhacks.com';
 
 export async function generateStaticParams() {
   const posts = await prisma.post.findMany({

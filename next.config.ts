@@ -50,7 +50,7 @@ const nextConfig: NextConfig = {
     // Inline critical CSS to reduce render-blocking
     optimizeCss: true,
   },
-  // Redirects for SEO consistency
+  // Redirects for SEO consistency - www redirects to non-www (canonical)
   async redirects() {
     return [
       {
@@ -58,10 +58,10 @@ const nextConfig: NextConfig = {
         has: [
           {
             type: "host",
-            value: "healthnutritionhacks.com",
+            value: "www.healthnutritionhacks.com",
           },
         ],
-        destination: "https://www.healthnutritionhacks.com/:path*",
+        destination: "https://healthnutritionhacks.com/:path*",
         permanent: true,
       },
     ];

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-const SITE_URL = 'https://www.healthnutritionhacks.com';
+const SITE_URL = 'https://healthnutritionhacks.com';
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent('About Us - Meet Our Team')}&category=About&author=HNH Team`;
 
 export const metadata: Metadata = {
@@ -45,8 +45,8 @@ const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Health Nutrition Hacks',
-  url: 'https://www.healthnutritionhacks.com',
-  logo: 'https://www.healthnutritionhacks.com/hnh_logo.svg',
+  url: 'https://healthnutritionhacks.com',
+  logo: 'https://healthnutritionhacks.com/hnh_logo.svg',
   description:
     'Evidence-based nutrition hacks, metabolic health strategies, and realistic wellness guidance for busy people.',
   sameAs: [

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 
-const SITE_URL = 'https://www.healthnutritionhacks.com';
+const SITE_URL = 'https://healthnutritionhacks.com';
 const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
 
 export const metadata: Metadata = {

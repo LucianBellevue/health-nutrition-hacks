@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getRecentPosts } from "@/lib/db-posts";
 import PostCard from "@/components/PostCard";
 
-const SITE_URL = "https://www.healthnutritionhacks.com";
+const SITE_URL = "https://healthnutritionhacks.com";
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent("Evidence-Based Wellness Tips & Meal Prep Guides")}&category=Health&author=HNH Team`;
 
 export const metadata: Metadata = {
@@ -53,14 +53,14 @@ const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Health Nutrition Hacks",
-  url: "https://www.healthnutritionhacks.com/",
+  url: "https://healthnutritionhacks.com/",
   logo: {
     "@type": "ImageObject",
-    url: "https://www.healthnutritionhacks.com/logo-512.png",
+    url: "https://healthnutritionhacks.com/logo-512.png",
     width: 512,
     height: 512,
   },
-  image: "https://www.healthnutritionhacks.com/og-logo.png",
+  image: "https://healthnutritionhacks.com/og-logo.png",
   sameAs: [
     "https://www.facebook.com/profile.php?id=61586863918949",
     "https://www.pinterest.com/healthnutritionhacks",
@@ -72,7 +72,7 @@ const organizationSchema = {
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "Customer Service",
-    url: "https://www.healthnutritionhacks.com/contact",
+    url: "https://healthnutritionhacks.com/contact",
   },
 };
 
@@ -80,21 +80,21 @@ const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Health Nutrition Hacks",
-  url: "https://www.healthnutritionhacks.com",
+  url: "https://healthnutritionhacks.com",
   description: "Evidence-based nutrition tips, healthy recipes, and wellness guidance for busy people.",
   publisher: {
     "@type": "Organization",
     name: "Health Nutrition Hacks",
     logo: {
       "@type": "ImageObject",
-      url: "https://www.healthnutritionhacks.com/logo-512.png",
+      url: "https://healthnutritionhacks.com/logo-512.png",
     },
   },
   potentialAction: {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: "https://www.healthnutritionhacks.com/blog?search={search_term_string}",
+      urlTemplate: "https://healthnutritionhacks.com/blog?search={search_term_string}",
     },
     "query-input": "required name=search_term_string",
   },

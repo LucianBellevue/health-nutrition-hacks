@@ -14,7 +14,7 @@ const AdSenseMultiplex = dynamic(() => import('@/components/AdSenseMultiplex'));
 // Posts per page
 const POSTS_PER_PAGE = 9;
 
-const SITE_URL = 'https://www.healthnutritionhacks.com';
+const SITE_URL = 'https://healthnutritionhacks.com';
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent('Nutrition Blog - Latest Articles')}&category=Blog&author=HNH Team`;
 
 export const metadata: Metadata = {

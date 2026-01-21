@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = 'https://www.healthnutritionhacks.com';
+  const siteUrl = 'https://healthnutritionhacks.com';
 
   return {
     rules: [
