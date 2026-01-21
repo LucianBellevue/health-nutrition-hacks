@@ -113,7 +113,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         {/* Google Analytics (gtag.js) */}
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-R0CDW6G178"
+          src="https://www.googletagmanager.com/gtag/js?id=G-E52LN1C1H2"
           strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
@@ -121,7 +121,7 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-R0CDW6G178');
+            gtag('config', 'G-E52LN1C1H2');
           `}
         </Script>
         {/* AdSense script deferred to not block rendering */}
