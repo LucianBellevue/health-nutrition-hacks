@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from "next/image";
+import { memo } from 'react';
 import { PostMetadata } from "@/lib/posts";
 import CategoryBadge from "./CategoryBadge";
 import TagPill from "./TagPill";
@@ -8,18 +9,25 @@ interface PostCardProps {
   post: PostMetadata;
 }
 
+// Date formatter instance (reused across renders)
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
 /**
  * Card component for displaying post preview on blog index
+ * Memoized to prevent unnecessary re-renders
  */
-export default function PostCard({ post }: PostCardProps) {
-  const formattedDate = new Date(post.date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+function PostCard({ post }: PostCardProps) {
+  const formattedDate = dateFormatter.format(new Date(post.date));
 
   return (
-    <article className="group relative bg-white dark:bg-zinc-900/80 rounded-3xl border border-zinc-100 dark:border-zinc-800/70 shadow-sm hover:shadow-[0_20px_50px_rgba(15,23,42,0.12)] dark:hover:shadow-zinc-900/60 transition-all duration-300 overflow-hidden h-full flex flex-col">
+    <article 
+      className="group relative bg-white dark:bg-zinc-900/80 rounded-3xl border border-zinc-100 dark:border-zinc-800/70 shadow-sm hover:shadow-[0_20px_50px_rgba(15,23,42,0.12)] dark:hover:shadow-zinc-900/60 transition-all duration-300 overflow-hidden h-full flex flex-col"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '1px 500px' }}
+    >
       {post.image && (
         <Link href={`/blog/${post.slug}`} className="block overflow-hidden">
           <div className="aspect-16/10 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800 relative">
@@ -80,3 +88,5 @@ export default function PostCard({ post }: PostCardProps) {
     </article>
   );
 }
+
+export default memo(PostCard);

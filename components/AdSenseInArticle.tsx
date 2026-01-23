@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 declare global {
   interface Window {
@@ -10,8 +10,38 @@ declare global {
 
 export default function AdSenseInArticle() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Use Intersection Observer to only load ad when near viewport
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        rootMargin: '200px', // Load when 200px away from viewport
+        threshold: 0.01,
+      }
+    );
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    
     const container = containerRef.current;
     if (!container) return;
 
@@ -32,18 +62,20 @@ export default function AdSenseInArticle() {
     };
 
     requestAnimationFrame(initAd);
-  }, []);
+  }, [isVisible]);
 
   return (
     <div ref={containerRef} className="my-6 min-w-[280px] w-full">
-      <ins
-        className="adsbygoogle"
-        style={{ display: 'block', textAlign: 'center', minWidth: '250px', width: '100%' }}
-        data-ad-layout="in-article"
-        data-ad-format="fluid"
-        data-ad-client="ca-pub-6330166847282337"
-        data-ad-slot="9299108152"
-      />
+      {isVisible && (
+        <ins
+          className="adsbygoogle"
+          style={{ display: 'block', textAlign: 'center', minWidth: '250px', width: '100%' }}
+          data-ad-layout="in-article"
+          data-ad-format="fluid"
+          data-ad-client="ca-pub-6330166847282337"
+          data-ad-slot="9299108152"
+        />
+      )}
     </div>
   );
 }

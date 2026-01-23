@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import FooterNewsletter from './FooterNewsletter';
@@ -7,10 +8,11 @@ import { useAppSelector } from '@/store/hooks';
 
 /**
  * Site footer with copyright and links
+ * Memoized to prevent unnecessary re-renders
  */
-export default function Footer() {
+function Footer() {
   const isAdminRoute = useAppSelector((state) => state.ui.isAdminRoute);
-  const currentYear = new Date().getFullYear();
+  const currentYear = useMemo(() => new Date().getFullYear(), []);
 
   if (isAdminRoute) return null;
 
@@ -218,3 +220,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+export default memo(Footer);

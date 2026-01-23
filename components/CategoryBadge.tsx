@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { memo } from 'react';
 
 interface CategoryBadgeProps {
   name: string;
@@ -8,8 +9,9 @@ interface CategoryBadgeProps {
 
 /**
  * Category badge component - displays a category with optional link
+ * Memoized to prevent unnecessary re-renders
  */
-export default function CategoryBadge({ name, href, size = 'sm' }: CategoryBadgeProps) {
+function CategoryBadge({ name, href, size = 'sm' }: CategoryBadgeProps) {
   const sizeClasses = {
     sm: 'text-xs px-2.5 py-1',
     md: 'text-sm px-3 py-1.5',
@@ -31,3 +33,5 @@ export default function CategoryBadge({ name, href, size = 'sm' }: CategoryBadge
 
   return <span className={baseClasses}>{name}</span>;
 }
+
+export default memo(CategoryBadge);

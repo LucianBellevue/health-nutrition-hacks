@@ -3,11 +3,13 @@ import Script from "next/script";
 import dynamic from "next/dynamic";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
+import { CriticalCSS } from "./CriticalCSS";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReduxProvider from "@/components/providers/ReduxProvider";
 import ThemeHydrator, { ThemeScript } from "@/components/theme/ThemeProvider";
 import PreferencesHydrator from "@/components/preferences/PreferencesHydrator";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 // Dynamic imports for non-critical components to reduce initial JS bundle
 // These components are code-split and loaded separately from the main bundle
@@ -23,6 +25,7 @@ const montserrat = Montserrat({
   preload: true,
   weight: ["400", "500", "600", "700"], // Removed 300, 800 - rarely used
   fallback: ["system-ui", "-apple-system", "sans-serif"],
+  adjustFontFallback: true, // Adjust fallback font to reduce layout shift
 });
 
 const SITE_URL = "https://healthnutritionhacks.com";
@@ -98,33 +101,17 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         {/* Inline critical CSS to eliminate render-blocking chain */}
-        <style dangerouslySetInnerHTML={{ __html: `
-          :root{--background:#ecfdf5;--foreground:#18181b}
-          .dark{--background:#09090b;--foreground:#fafafa}
-          body{background:var(--background);color:var(--foreground)}
-        `}} />
+        <CriticalCSS />
         {/* RSS Feed discovery */}
         <link rel="alternate" type="application/rss+xml" title="Health Nutrition Hacks RSS Feed" href="https://healthnutritionhacks.com/rss.xml" />
-        {/* Preconnect to AdSense */}
-        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
-        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
-        {/* Preconnect to Google Analytics */}
+        {/* Resource hints for faster loading */}
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        {/* Google Analytics (gtag.js) */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-E52LN1C1H2"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-E52LN1C1H2');
-          `}
-        </Script>
-        {/* AdSense script deferred to not block rendering */}
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        {/* Google Analytics - Lazy loaded to reduce initial JS */}
+        <GoogleAnalytics />
+        {/* AdSense - Lazy loaded, components handle initialization via Intersection Observer */}
         <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6330166847282337"
           crossOrigin="anonymous"

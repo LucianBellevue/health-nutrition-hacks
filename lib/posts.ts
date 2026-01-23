@@ -15,6 +15,7 @@ export interface PostMetadata {
   image?: string;
   readingTime?: number;
   slug: string;
+  faqs?: Array<{ question: string; answer: string }>;
 }
 
 export interface Post {

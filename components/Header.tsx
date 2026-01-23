@@ -1,26 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAppSelector } from '@/store/hooks';
 
 /**
  * Site header with logo, responsive burger menu navigation
+ * Memoized to prevent unnecessary re-renders
  */
-export default function Header() {
+function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isAdminRoute = useAppSelector((state) => state.ui.isAdminRoute);
 
-  if (isAdminRoute) return null;
+  const toggleMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen((prev) => !prev);
+  }, []);
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
+  const closeMobileMenu = useCallback(() => {
     setIsMobileMenuOpen(false);
-  };
+  }, []);
+
+  if (isAdminRoute) return null;
 
   const navLinks = [
     { href: '/', label: 'Home' },
@@ -133,3 +134,5 @@ export default function Header() {
     </header>
   );
 }
+
+export default memo(Header);

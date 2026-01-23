@@ -17,6 +17,8 @@ import ProductCard from '@/components/ProductCard';
 import BackButton from '@/components/BackButton';
 import TrendingArticle from '@/components/TrendingArticle';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import FAQSection, { FAQItem } from '@/components/FAQSection';
+import { generateFAQSchema } from '@/lib/faqSchema';
 
 // Dynamic imports for non-critical components to reduce initial JS bundle
 const NewsletterSignup = dynamic(() => import('@/components/NewsletterSignup'), {
@@ -33,6 +35,7 @@ const components = {
   ProductCard,
   NewsletterCTA,
   AdSenseInArticle,
+  FAQSection,
 };
 
 // MDX options
@@ -231,6 +234,22 @@ export default async function PostPage({ params }: Props) {
     ],
   };
 
+  // Extract FAQ data if it exists in the post metadata
+  let faqItems: FAQItem[] = [];
+  let faqSchema = null;
+  
+  try {
+    // Try to parse FAQ data from post metadata
+    const postWithMetadata = post as typeof post & { metadata?: string | null };
+    const metadata = postWithMetadata.metadata ? JSON.parse(postWithMetadata.metadata as string) : {};
+    if (metadata.faqs && Array.isArray(metadata.faqs)) {
+      faqItems = metadata.faqs;
+      faqSchema = generateFAQSchema(faqItems);
+    }
+  } catch {
+    // If parsing fails, skip FAQ schema
+  }
+
   return (
     <article className="min-h-screen bg-white dark:bg-zinc-950">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -310,6 +329,9 @@ export default async function PostPage({ params }: Props) {
           )}
         </Prose>
 
+        {/* FAQ Section */}
+        {faqItems.length > 0 && <FAQSection items={faqItems} />}
+
         {/* Author Box - Bottom (repeated for engagement) */}
         <AuthorBox author={author} />
 
@@ -361,6 +383,12 @@ export default async function PostPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
     </article>
   );
 }

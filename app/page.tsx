@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { getRecentPosts } from "@/lib/db-posts";
 import PostCard from "@/components/PostCard";
 
@@ -100,9 +101,30 @@ const websiteSchema = {
   },
 };
 
-export default async function Home() {
+// Component for loading recent posts
+async function RecentPosts() {
   const recentPosts = await getRecentPosts(3);
 
+  if (recentPosts.length === 0) {
+    return (
+      <div className="text-center py-12 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+        <p className="text-zinc-700 dark:text-zinc-300 text-lg">
+          New content coming soon! Check back shortly.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {recentPosts.map((post) => (
+        <PostCard key={post.metadata.slug} post={post.metadata} />
+      ))}
+    </div>
+  );
+}
+
+export default function Home() {
   return (
     <div className="bg-linear-to-b from-emerald-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
       {/* Hero Section */}
@@ -262,19 +284,20 @@ export default async function Home() {
             </Link>
           </div>
 
-          {recentPosts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recentPosts.map((post) => (
-                <PostCard key={post.metadata.slug} post={post.metadata} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-              <p className="text-zinc-700 dark:text-zinc-300 text-lg">
-                New content coming soon! Check back shortly.
-              </p>
-            </div>
-          )}
+          <Suspense 
+            fallback={
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <div 
+                    key={i} 
+                    className="h-96 bg-zinc-100 dark:bg-zinc-800 rounded-3xl animate-pulse"
+                  />
+                ))}
+              </div>
+            }
+          >
+            <RecentPosts />
+          </Suspense>
 
           <div className="text-center mt-8 sm:hidden">
             <Link
