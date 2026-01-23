@@ -50,6 +50,7 @@ model Post {
   metaTitle        String?
   metaDescription  String?
   readingTime      Int?
+  metadata         Json?     // Additional metadata (FAQs, etc.)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   authorId         String

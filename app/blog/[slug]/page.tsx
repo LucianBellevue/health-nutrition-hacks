@@ -238,16 +238,13 @@ export default async function PostPage({ params }: Props) {
   let faqItems: FAQItem[] = [];
   let faqSchema = null;
   
-  try {
-    // Try to parse FAQ data from post metadata
-    const postWithMetadata = post as typeof post & { metadata?: string | null };
-    const metadata = postWithMetadata.metadata ? JSON.parse(postWithMetadata.metadata as string) : {};
+  // Prisma returns Json fields as objects, not strings
+  if (post.metadata && typeof post.metadata === 'object') {
+    const metadata = post.metadata as { faqs?: Array<{ question: string; answer: string }> };
     if (metadata.faqs && Array.isArray(metadata.faqs)) {
       faqItems = metadata.faqs;
       faqSchema = generateFAQSchema(faqItems);
     }
-  } catch {
-    // If parsing fails, skip FAQ schema
   }
 
   return (
