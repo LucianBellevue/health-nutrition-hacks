@@ -1,7 +1,7 @@
 # Admin Dashboard Setup Guide
 
 This guide explains how to set up and use the admin dashboard for Health & Nutrition Hacks blog.
-"hello this is a test"
+
 ## Prerequisites
 
 - Node.js 18+
