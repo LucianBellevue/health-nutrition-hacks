@@ -15,10 +15,13 @@ import Image from 'next/image';
 import PostImage from '@/components/PostImage';
 import ProductCard from '@/components/ProductCard';
 import BackButton from '@/components/BackButton';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import TrendingArticle from '@/components/TrendingArticle';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import FAQSection, { FAQItem } from '@/components/FAQSection';
+import ContentDisclosure from '@/components/ContentDisclosure';
 import { generateFAQSchema } from '@/lib/faqSchema';
+import { getFAQsForPost } from '@/lib/faqSync';
 
 // Dynamic imports for non-critical components to reduce initial JS bundle
 const NewsletterSignup = dynamic(() => import('@/components/NewsletterSignup'), {
@@ -149,8 +152,52 @@ export default async function PostPage({ params }: Props) {
     notFound();
   }
 
-  // Get author information
-  const author = getAuthorByIdOrDefault(post.authorId);
+  // Get author information from metadata or fallback to default
+  let author;
+  let shouldShowDisclosure = false; // Track if we should show AI disclosure
+  
+  if (post.metadata && typeof post.metadata === 'object') {
+    const metadata = post.metadata as { 
+      authorId?: string; 
+      customAuthor?: { 
+        name: string; 
+        bio: string; 
+        avatarUrl: string; 
+        social?: { 
+          website?: string; 
+          twitter?: string; 
+          linkedin?: string 
+        } 
+      } 
+    };
+    
+    // Check for custom author first (human author - no disclosure)
+    if (metadata.customAuthor && metadata.authorId === 'custom') {
+      author = {
+        id: 'custom',
+        name: metadata.customAuthor.name,
+        bio: metadata.customAuthor.bio,
+        avatarUrl: metadata.customAuthor.avatarUrl || '/hnh_logo.svg',
+        social: metadata.customAuthor.social,
+      };
+      shouldShowDisclosure = false; // Custom authors are human - no disclosure
+    } 
+    // Check for specific author ID
+    else if (metadata.authorId && metadata.authorId !== 'custom') {
+      author = getAuthorByIdOrDefault(metadata.authorId);
+      // Only show disclosure if explicitly editorial team
+      shouldShowDisclosure = author.id === 'editorial-team' || author.id === 'editorial-reviewer';
+    }
+    // No authorId in metadata = default to editorial team (show disclosure)
+    else {
+      author = getAuthorByIdOrDefault(post.authorId);
+      shouldShowDisclosure = true; // Default = editorial team = show disclosure
+    }
+  } else {
+    // No metadata = default to editorial team (show disclosure)
+    author = getAuthorByIdOrDefault(post.authorId);
+    shouldShowDisclosure = true; // Default = editorial team = show disclosure
+  }
 
   // Get trending post (excluding current post)
   const trendingPost = await prisma.post.findFirst({
@@ -158,21 +205,72 @@ export default async function PostPage({ params }: Props) {
       published: true,
       slug: { not: slug },
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { updatedAt: 'desc' }, // Sort by updatedAt to show recently updated posts
     include: {
       author: { select: { name: true } },
       category: { select: { name: true } },
     },
   });
 
-  const formattedDate = new Date(post.createdAt).toLocaleDateString('en-US', {
+  // Use updatedAt if post has been updated, otherwise use createdAt
+  const displayDate = post.updatedAt.getTime() !== post.createdAt.getTime()
+    ? post.updatedAt
+    : post.createdAt;
+  
+  const formattedDate = new Date(displayDate).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
+  
+  // Check if post was updated (for showing "Updated" label)
+  const isUpdated = post.updatedAt.getTime() !== post.createdAt.getTime();
+
+  // Check if this is an editorial team author (for structured data and AuthorBox)
+  // Custom authors should NOT be treated as editorial team
+  const isEditorialTeam = author.id === 'editorial-team' || author.id === 'editorial-reviewer' || author.id === 'default';
 
   // Article structured data for SEO
-  const articleSchema = {
+  const articleSchema: {
+    '@context': string;
+    '@type': string;
+    headline: string;
+    description: string;
+    image: string;
+    datePublished: string;
+    dateModified: string;
+    author: {
+      '@type': string;
+      name: string;
+      url?: string;
+      description?: string;
+    };
+    publisher: {
+      '@type': string;
+      name: string;
+      logo: {
+        '@type': string;
+        url: string;
+      };
+    };
+    mainEntityOfPage: {
+      '@type': string;
+      '@id': string;
+    };
+    keywords: string;
+    articleSection: string;
+    wordCount: number;
+    editor?: {
+      '@type': string;
+      name: string;
+      description: string;
+    };
+    about?: {
+      '@type': string;
+      name: string;
+      description: string;
+    };
+  } = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: post.title,
@@ -180,11 +278,18 @@ export default async function PostPage({ params }: Props) {
     image: post.image ? `${SITE_URL}${post.image}` : `${SITE_URL}/api/og?title=${encodeURIComponent(post.title)}&category=${encodeURIComponent(post.category.name)}&author=${encodeURIComponent(author.name)}`,
     datePublished: post.createdAt.toISOString(),
     dateModified: post.updatedAt.toISOString(),
-    author: {
-      '@type': 'Person',
-      name: author.name,
-      url: author.social?.website,
-    },
+    author: isEditorialTeam
+      ? {
+          '@type': 'Organization',
+          name: author.name,
+          url: author.social?.website || SITE_URL,
+        }
+      : {
+          '@type': 'Person',
+          name: author.name,
+          url: author.social?.website,
+          ...(author.bio ? { description: author.bio } : {}), // Include bio for custom authors if available
+        },
     publisher: {
       '@type': 'Organization',
       name: 'Health Nutrition Hacks',
@@ -201,6 +306,20 @@ export default async function PostPage({ params }: Props) {
     articleSection: post.category.name,
     wordCount: post.content.split(/\s+/).length,
   };
+
+  // Add editorial review information for E-E-A-T (especially important for AI-generated content)
+  if (isEditorialTeam) {
+    articleSchema.editor = {
+      '@type': 'Organization',
+      name: 'Health Nutrition Hacks Editorial Team',
+      description: 'Editorial team of nutrition professionals and registered dietitians who review and verify all content',
+    };
+    articleSchema.about = {
+      '@type': 'Thing',
+      name: 'Evidence-based nutrition information',
+      description: 'Content reviewed and verified by nutrition experts',
+    };
+  }
 
   // BreadcrumbList structured data for rich snippets
   const breadcrumbSchema = {
@@ -234,18 +353,44 @@ export default async function PostPage({ params }: Props) {
     ],
   };
 
-  // Extract FAQ data if it exists in the post metadata
+  // Get FAQs from database (preferred) or fallback to metadata
   let faqItems: FAQItem[] = [];
   let faqSchema = null;
   
-  // Prisma returns Json fields as objects, not strings
-  if (post.metadata && typeof post.metadata === 'object') {
-    const metadata = post.metadata as { faqs?: Array<{ question: string; answer: string }> };
-    if (metadata.faqs && Array.isArray(metadata.faqs)) {
-      faqItems = metadata.faqs;
+  try {
+    // Try to get FAQs from database first
+    faqItems = await getFAQsForPost(post.id);
+    
+    // If no FAQs in database, fallback to metadata
+    if (faqItems.length === 0 && post.metadata && typeof post.metadata === 'object') {
+      const metadata = post.metadata as { faqs?: Array<{ question: string; answer: string }> };
+      if (metadata.faqs && Array.isArray(metadata.faqs)) {
+        faqItems = metadata.faqs;
+      }
+    }
+    
+    // Generate schema if we have FAQs
+    if (faqItems.length > 0) {
       faqSchema = generateFAQSchema(faqItems);
     }
+  } catch (error) {
+    console.error('Error fetching FAQs:', error);
+    // Fallback to metadata if database query fails
+    if (post.metadata && typeof post.metadata === 'object') {
+      const metadata = post.metadata as { faqs?: Array<{ question: string; answer: string }> };
+      if (metadata.faqs && Array.isArray(metadata.faqs)) {
+        faqItems = metadata.faqs;
+        faqSchema = generateFAQSchema(faqItems);
+      }
+    }
   }
+
+  // Build breadcrumb items
+  const breadcrumbItems = [
+    { name: 'Blog', href: '/blog' },
+    { name: post.category.name, href: `/categories/${post.category.slug}` },
+    { name: post.title, href: `/blog/${slug}` },
+  ];
 
   return (
     <article className="min-h-screen bg-white dark:bg-zinc-950">
@@ -254,6 +399,9 @@ export default async function PostPage({ params }: Props) {
         <div className="mb-6">
           <BackButton />
         </div>
+
+        {/* Breadcrumbs */}
+        <Breadcrumbs items={breadcrumbItems} />
 
         {/* Article Header */}
         <header className="mb-8">
@@ -283,7 +431,15 @@ export default async function PostPage({ params }: Props) {
                 <span>•</span>
               </>
             )}
-            <time dateTime={post.createdAt.toISOString()}>{formattedDate}</time>
+            <time dateTime={displayDate.toISOString()}>
+              {isUpdated ? (
+                <>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Updated:</span> {formattedDate}
+                </>
+              ) : (
+                formattedDate
+              )}
+            </time>
             {post.readingTime && (
               <>
                 <span>•</span>
@@ -329,6 +485,9 @@ export default async function PostPage({ params }: Props) {
         {/* FAQ Section */}
         {faqItems.length > 0 && <FAQSection items={faqItems} />}
 
+        {/* Content Disclosure - Always show for editorial team (default), never for human authors */}
+        {shouldShowDisclosure && <ContentDisclosure />}
+
         {/* Author Box - Bottom (repeated for engagement) */}
         <AuthorBox author={author} />
 
@@ -347,7 +506,9 @@ export default async function PostPage({ params }: Props) {
               title: trendingPost.title,
               description: trendingPost.description,
               slug: trendingPost.slug,
-              date: trendingPost.createdAt.toISOString().split('T')[0],
+              date: trendingPost.updatedAt.getTime() !== trendingPost.createdAt.getTime()
+                ? trendingPost.updatedAt.toISOString().split('T')[0]
+                : trendingPost.createdAt.toISOString().split('T')[0],
               author: trendingPost.author.name || 'Unknown',
               authorId: trendingPost.authorId,
               category: trendingPost.category.name,

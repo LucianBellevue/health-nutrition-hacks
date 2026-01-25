@@ -45,6 +45,12 @@ export default async function EditPostPage({
           scheduledAt: post.scheduledAt?.toISOString().slice(0, 16) || '',
           metaTitle: post.metaTitle || '',
           metaDescription: post.metaDescription || '',
+          authorId: post.metadata && typeof post.metadata === 'object' 
+            ? (post.metadata as { authorId?: string }).authorId 
+            : undefined,
+          customAuthor: post.metadata && typeof post.metadata === 'object' 
+            ? (post.metadata as { customAuthor?: { name: string; bio: string; avatarUrl: string; social?: { website?: string; twitter?: string; linkedin?: string } } }).customAuthor 
+            : undefined,
         }}
       />
     </div>

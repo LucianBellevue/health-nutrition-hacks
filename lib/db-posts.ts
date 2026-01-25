@@ -3,7 +3,8 @@ import prisma from './prisma';
 export interface PostMetadata {
   title: string;
   description: string;
-  date: string;
+  date: string; // Display date (uses updatedAt if different from createdAt)
+  updatedAt?: string; // Last updated date for freshness signals
   author: string;
   authorId: string;
   category: string;
@@ -52,11 +53,17 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
   if (!post) return null;
 
+  // Use updatedAt if post has been updated (different from createdAt), otherwise use createdAt
+  const displayDate = post.updatedAt.getTime() !== post.createdAt.getTime()
+    ? post.updatedAt.toISOString().split('T')[0]
+    : post.createdAt.toISOString().split('T')[0];
+
   return {
     metadata: {
       title: post.title,
       description: post.description,
-      date: post.createdAt.toISOString().split('T')[0],
+      date: displayDate,
+      updatedAt: post.updatedAt.toISOString().split('T')[0],
       author: post.author.name || 'Unknown',
       authorId: post.authorId,
       category: post.category.name,
@@ -72,7 +79,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 export async function getAllPosts(): Promise<Post[]> {
   const posts = await prisma.post.findMany({
     where: { published: true },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { updatedAt: 'desc' }, // Sort by updatedAt to show recently updated posts first
     include: {
       author: {
         select: { name: true, id: true },
@@ -81,21 +88,29 @@ export async function getAllPosts(): Promise<Post[]> {
     },
   });
 
-  return posts.map((post) => ({
-    metadata: {
-      title: post.title,
-      description: post.description,
-      date: post.createdAt.toISOString().split('T')[0],
-      author: post.author.name || 'Unknown',
-      authorId: post.authorId,
-      category: post.category.name,
-      tags: post.tags,
-      image: post.image || undefined,
-      readingTime: post.readingTime || undefined,
-      slug: post.slug,
-    },
-    content: post.content,
-  }));
+  return posts.map((post) => {
+    // Use updatedAt if post has been updated (different from createdAt), otherwise use createdAt
+    const displayDate = post.updatedAt.getTime() !== post.createdAt.getTime()
+      ? post.updatedAt.toISOString().split('T')[0]
+      : post.createdAt.toISOString().split('T')[0];
+
+    return {
+      metadata: {
+        title: post.title,
+        description: post.description,
+        date: displayDate,
+        updatedAt: post.updatedAt.toISOString().split('T')[0],
+        author: post.author.name || 'Unknown',
+        authorId: post.authorId,
+        category: post.category.name,
+        tags: post.tags,
+        image: post.image || undefined,
+        readingTime: post.readingTime || undefined,
+        slug: post.slug,
+      },
+      content: post.content,
+    };
+  });
 }
 
 export async function getRecentPosts(limit?: number): Promise<Post[]> {

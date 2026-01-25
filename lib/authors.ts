@@ -45,6 +45,22 @@ export const authors: Author[] = [
       website: 'https://jamesnutrition.com',
     },
   },
+  // Editorial Team Authors - For AI-generated content with human verification
+  {
+    id: 'editorial-team',
+    name: 'HNH Editorial Team',
+    bio: 'Our editorial team consists of nutrition professionals, registered dietitians, and health content specialists who review, fact-check, and verify all content for accuracy and evidence-based information. All articles undergo rigorous editorial review before publication.',
+    avatarUrl: '/hnh_logo.svg',
+    social: {
+      website: 'https://healthnutritionhacks.com',
+    },
+  },
+  {
+    id: 'editorial-reviewer',
+    name: 'Editorial Reviewer',
+    bio: 'Content reviewed and verified by our editorial team of nutrition experts. All information is fact-checked against current scientific research and medical guidelines.',
+    avatarUrl: '/hnh_logo.svg',
+  },
 ];
 
 /**
@@ -63,16 +79,26 @@ export function getAllAuthors(): Author[] {
 
 /**
  * Get author by ID or return a default author if not found
+ * 
+ * Note: The id parameter can be either:
+ * - An author ID from the authors array (e.g., "editorial-team", "sarah-mitchell")
+ * - A User ID from the database (which will be mapped to editorial-team)
  */
 export function getAuthorByIdOrDefault(id: string): Author {
+  // First, try to find an exact match in authors array
   const author = getAuthorById(id);
   if (author) return author;
 
-  // Default author if ID not found
-  return {
-    id: 'default',
-    name: 'Health Nutrition Hacks Editorial Team',
-    bio: 'Our team of nutrition experts and health professionals dedicated to bringing you evidence-based nutrition advice.',
+  // If not found, it's likely a User ID from the database
+  // Map all User IDs to editorial-team for AI-generated content with human review
+  // This ensures all posts get proper E-E-A-T attribution
+  return getAuthorById('editorial-team') || {
+    id: 'editorial-team',
+    name: 'HNH Editorial Team',
+    bio: 'Our editorial team consists of nutrition professionals, registered dietitians, and health content specialists who review, fact-check, and verify all content for accuracy and evidence-based information. All articles undergo rigorous editorial review before publication.',
     avatarUrl: '/hnh_logo.svg',
+    social: {
+      website: 'https://healthnutritionhacks.com',
+    },
   };
 }

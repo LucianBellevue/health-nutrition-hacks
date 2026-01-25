@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
       scheduledAt,
       metaTitle,
       metaDescription,
+      metadata,
     } = body;
 
     if (!title || !slug || !description || !content || !categoryId) {
@@ -83,6 +84,7 @@ export async function POST(request: NextRequest) {
         metaDescription: metaDescription || null,
         readingTime,
         authorId: session.user.id,
+        metadata: metadata && Object.keys(metadata).length > 0 ? metadata : null,
       },
     });
 

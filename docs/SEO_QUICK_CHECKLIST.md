@@ -86,10 +86,10 @@ authorId: "sarah-mitchell"
 ## 🟡 MEDIUM PRIORITY (Week 2-4)
 
 ### Technical Enhancements
-- [ ] Add image sitemap (update `/app/sitemap.ts`)
+- [x] Add image sitemap (update `/app/sitemap.ts`)
 - [ ] Add security headers (update `next.config.ts`)
 - [ ] Create affiliate disclosure component
-- [ ] Add "Last Updated" dates to posts
+- [x] Add "Last Updated" dates to posts
 
 ---
 
@@ -215,13 +215,14 @@ authorId: "sarah-mitchell"
 | Task | Impact | Effort | Priority | Status |
 |------|--------|--------|----------|--------|
 | Author attribution | 🔴 HIGH | 30 min | CRITICAL | ⬜ |
-| Image alt text | 🟠 HIGH | 2-3 hrs | CRITICAL | ⬜ |
-| FAQ schema | 🟡 MED | 1-2 hrs | CRITICAL | ⬜ |
+| Image alt text | 🟠 HIGH | 2-3 hrs | CRITICAL | ✅ |
+| FAQ schema | 🟡 MED | 1-2 hrs | CRITICAL | ✅ |
 | Author pages | 🔴 HIGH | 4-6 hrs | HIGH | ⬜ |
 | Related posts | 🟡 MED | 2-3 hrs | HIGH | ⬜ |
-| Breadcrumbs | 🟢 LOW | 1 hr | HIGH | ⬜ |
-| Image sitemap | 🟢 LOW | 30 min | MEDIUM | ⬜ |
+| Breadcrumbs | 🟢 LOW | 1 hr | HIGH | ✅ |
+| Image sitemap | 🟢 LOW | 30 min | MEDIUM | ✅ |
 | Security headers | 🟢 LOW | 15 min | MEDIUM | ⬜ |
+| Last Updated dates | 🟡 MED | 1 hr | MEDIUM | ✅ |
 
 ---
 

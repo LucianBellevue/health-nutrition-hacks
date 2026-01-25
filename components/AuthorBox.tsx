@@ -10,8 +10,9 @@ interface AuthorBoxProps {
  * Shows "Health Nutrition Hacks" as default if it's the default author
  */
 export default function AuthorBox({ author }: AuthorBoxProps) {
-  const isDefaultAuthor = author.id === "default";
-  const highlightPills = isDefaultAuthor
+  // Custom authors should NOT be treated as editorial team
+  const isEditorialTeam = author.id === "default" || author.id === "editorial-team" || author.id === "editorial-reviewer";
+  const highlightPills = isEditorialTeam
     ? ["Editorially curated", "Science-backed", "Women’s gut health focus"]
     : ["Evidence-based", "Reader-friendly tips", "Trusted guidance"];
 
@@ -33,16 +34,16 @@ export default function AuthorBox({ author }: AuthorBoxProps) {
                 fill
                 sizes="120px"
                 className={`transition-all duration-300 ${
-                  isDefaultAuthor ? "object-contain scale-75" : "object-cover"
+                  isEditorialTeam ? "object-contain scale-75" : "object-cover"
                 }`}
-                style={isDefaultAuthor ? { filter: "brightness(0) invert(1)" } : undefined}
+                style={isEditorialTeam ? { filter: "brightness(0) invert(1)" } : undefined}
                 loading="lazy"
                 decoding="async"
               />
             </div>
-            {isDefaultAuthor && (
-              <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-zinc-900 text-white text-xs font-semibold tracking-wide px-4 py-1 shadow-lg uppercase">
-                HNH Studio
+            {isEditorialTeam && (
+              <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-600 dark:bg-emerald-500 text-white text-xs font-semibold tracking-wide px-4 py-1 shadow-lg uppercase">
+                Verified
               </span>
             )}
           </div>
@@ -50,16 +51,16 @@ export default function AuthorBox({ author }: AuthorBoxProps) {
           {/* Author Info */}
           <div className="flex-1 text-center md:text-left">
             <p className="text-[11px] font-semibold tracking-[0.45em] text-emerald-600 uppercase mb-3">
-              {isDefaultAuthor ? "Editorial Insight" : "Author Spotlight"}
+              {isEditorialTeam ? "Editorial Review" : "Author Spotlight"}
             </p>
 
             <div className="flex flex-col gap-1">
               <h3 className="text-2xl md:text-3xl font-semibold text-zinc-900 dark:text-zinc-50 leading-snug">
-                {isDefaultAuthor ? "Health Nutrition Hacks Editorial Team" : author.name}
+                {isEditorialTeam ? author.name : author.name}
               </h3>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {isDefaultAuthor
-                  ? "Multidisciplinary nutrition editors + RDs"
+                {isEditorialTeam
+                  ? "Nutrition professionals & registered dietitians"
                   : "Evidence-based contributor"}
               </p>
             </div>

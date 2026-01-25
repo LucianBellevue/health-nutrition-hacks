@@ -1,0 +1,116 @@
+feat: Implement comprehensive author attribution system with E-E-A-T compliance
+
+This commit implements a complete author attribution system for AI-generated
+content that satisfies Google's E-E-A-T requirements while supporting both
+editorial team (default) and human authors.
+
+## Major Features
+
+### 1. Author Attribution System
+- Added editorial team authors for AI-generated content with human review
+- Implemented custom author support with full E-E-A-T fields
+- Created author selection UI in post editor with dropdown and custom fields
+- Default to Editorial Team when no author is selected
+- Support for predefined authors (sarah-mitchell, maria-rodriguez, james-chen)
+
+### 2. Content Disclosure Component
+- New ContentDisclosure component for AI-assisted content transparency
+- Always shows for Editorial Team (default or explicitly selected)
+- Never shows for human authors (custom or predefined non-editorial)
+- Emphasizes human review, fact-checking, and verification
+
+### 3. Content Freshness Signals
+- Updated post dates to use updatedAt when posts are edited
+- Shows "Updated: [date]" label for recently edited posts
+- Sorted posts by updatedAt to prioritize fresh content
+- Updated sitemap to use updatedAt for lastModified
+
+### 4. Enhanced Structured Data
+- Editorial team authors use Organization schema type
+- Custom/human authors use Person schema type
+- Added editor and about fields for editorial review information
+- Includes author bio in Person schema for custom authors
+
+### 5. FAQ System Integration
+- FAQ extraction from MDX content
+- Database storage with Prisma schema
+- API endpoint for syncing FAQs
+- Editor UI for FAQ management
+
+### 6. Breadcrumb Navigation
+- Visible breadcrumb component for better UX
+- Complements existing BreadcrumbList structured data
+- Integrated into blog post pages
+
+### 7. Image Sitemap
+- Added images property to sitemap entries
+- Supports both Cloudinary URLs and relative paths
+- Improves image discoverability for SEO
+
+## Files Added
+
+- components/ContentDisclosure.tsx - AI content transparency component
+- components/Breadcrumbs.tsx - Visible breadcrumb navigation
+- lib/faqExtractor.ts - FAQ extraction utilities
+- lib/faqSync.ts - FAQ database synchronization
+- app/api/admin/posts/[id]/sync-faqs/route.ts - FAQ sync endpoint
+- app/api/admin/posts/update-authors/route.ts - Bulk author update endpoint
+- scripts/update-posts-to-editorial-team.ts - Migration script
+- docs/AUTHOR_ATTRIBUTION_IMPLEMENTATION.md - Implementation guide
+- docs/AUTHOR_SELECTION_EDITOR.md - Editor usage guide
+- docs/EDITORIAL_TEAM_MIGRATION.md - Migration documentation
+
+## Files Modified
+
+### Core Components
+- components/AuthorBox.tsx - Updated to handle editorial team and custom authors
+- components/admin/PostEditor.mdx.tsx - Added author selection UI with custom fields
+
+### API Routes
+- app/api/admin/posts/route.ts - Save author data in metadata
+- app/api/admin/posts/[id]/route.ts - Update author data, merge with existing metadata
+
+### Pages
+- app/blog/[slug]/page.tsx - Author resolution from metadata, disclosure logic
+- app/admin/posts/[slug]/edit/page.tsx - Load author data from metadata
+
+### Data Layer
+- lib/authors.ts - Added editorial team authors, updated default mapping
+- lib/db-posts.ts - Use updatedAt for display dates, include updatedAt in metadata
+- prisma/schema.prisma - Added FAQ model with proper relations
+
+### SEO & Sitemap
+- app/sitemap.ts - Use updatedAt for lastModified, include images
+- docs/SEO_QUICK_CHECKLIST.md - Updated completion status
+
+## Key Improvements
+
+### SEO & E-E-A-T
+✅ Editorial team attribution with Organization schema
+✅ Custom author support with Person schema and full credentials
+✅ Content disclosure for AI-generated content
+✅ Enhanced structured data with editorial review information
+✅ Content freshness signals with updated dates
+
+### User Experience
+✅ Author selection in editor with intuitive UI
+✅ Custom author fields with E-E-A-T guidance
+✅ Visible breadcrumb navigation
+✅ "Updated" date labels for fresh content
+
+### Developer Experience
+✅ Comprehensive documentation
+✅ Migration scripts and API endpoints
+✅ Type-safe author handling
+✅ Metadata preservation (FAQs, etc.)
+
+## Breaking Changes
+None - All changes are backward compatible. Existing posts default to
+Editorial Team automatically.
+
+## Testing Recommendations
+1. Create post with default author (should show disclosure)
+2. Create post with custom author (should NOT show disclosure)
+3. Edit existing post and change author
+4. Verify structured data in page source
+5. Check sitemap includes images and updated dates

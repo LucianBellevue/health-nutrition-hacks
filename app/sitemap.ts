@@ -6,12 +6,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getAllPosts();
   const categories = await getAllCategories();
 
-  const blogPosts = posts.map((post) => ({
-    url: `${siteUrl}/blog/${post.metadata.slug}`,
-    lastModified: new Date(post.metadata.date),
-    changeFrequency: 'weekly' as const,
-    priority: 0.8,
-  }));
+  const blogPosts = posts.map((post) => {
+    // Use updatedAt if available, otherwise fall back to date
+    const lastModified = post.metadata.updatedAt
+      ? new Date(post.metadata.updatedAt)
+      : new Date(post.metadata.date);
+
+    const sitemapEntry: MetadataRoute.Sitemap[0] = {
+      url: `${siteUrl}/blog/${post.metadata.slug}`,
+      lastModified,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    };
+
+    // Add images if available (supports both Cloudinary URLs and relative paths)
+    if (post.metadata.image) {
+      // Handle absolute URLs (Cloudinary) and relative paths
+      const imageUrl = post.metadata.image.startsWith('http')
+        ? post.metadata.image
+        : `${siteUrl}${post.metadata.image.startsWith('/') ? '' : '/'}${post.metadata.image}`;
+      
+      // Next.js sitemap images property expects array of image URLs
+      sitemapEntry.images = [imageUrl];
+    }
+
+    return sitemapEntry;
+  });
 
   const categoryPages = categories.map((category) => ({
     url: `${siteUrl}/categories/${category.slug}`,

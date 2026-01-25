@@ -35,26 +35,27 @@ model Session {
 }
 
 model Post {
-  id               String    @id @default(cuid())
-  title            String
-  slug             String    @unique
-  description      String
-  content          String    @db.Text
-  format           String    @default("html") // "html" or "mdx"
-  categoryId       String
-  category         Category  @relation(fields: [categoryId], references: [id])
-  tags             String[]
-  image            String?
-  published        Boolean   @default(false)
-  scheduledAt      DateTime?
-  metaTitle        String?
-  metaDescription  String?
-  readingTime      Int?
-  metadata         Json?     // Additional metadata (FAQs, etc.)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  authorId         String
-  author           User      @relation(fields: [authorId], references: [id])
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  description     String
+  content         String    @db.Text
+  format          String    @default("html") // "html" or "mdx"
+  categoryId      String
+  category        Category  @relation(fields: [categoryId], references: [id])
+  tags            String[]
+  image           String?
+  published       Boolean   @default(false)
+  scheduledAt     DateTime?
+  metaTitle       String?
+  metaDescription String?
+  readingTime     Int?
+  metadata        Json? // Additional metadata (FAQs, etc.)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  authorId        String
+  author          User      @relation(fields: [authorId], references: [id])
+  faqs            FAQ[] // FAQs stored in database
 
   @@index([slug])
   @@index([published])
@@ -71,6 +72,21 @@ model Category {
   updatedAt   DateTime @updatedAt
 
   @@index([slug])
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  question  String
+  answer    String   @db.Text
+  order     Int      @default(0) // Order within the post
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([postId, order])
+  @@map("faq")
 }
 
 enum Role {

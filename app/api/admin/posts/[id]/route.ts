@@ -55,6 +55,7 @@ export async function PUT(
       scheduledAt,
       metaTitle,
       metaDescription,
+      metadata,
     } = body;
 
     if (!title || !slug || !description || !content || !categoryId) {
@@ -83,6 +84,22 @@ export async function PUT(
     const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
     const readingTime = Math.ceil(wordCount / 200);
 
+    // Merge author metadata with existing metadata (preserve FAQs if they exist)
+    let updatedMetadata = metadata || {};
+    if (metadata) {
+      const existingPost = await prisma.post.findUnique({
+        where: { id },
+        select: { metadata: true },
+      });
+      
+      if (existingPost?.metadata && typeof existingPost.metadata === 'object') {
+        updatedMetadata = {
+          ...(existingPost.metadata as object),
+          ...metadata,
+        };
+      }
+    }
+
     const post = await prisma.post.update({
       where: { id },
       data: {
@@ -99,6 +116,7 @@ export async function PUT(
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
         readingTime,
+        metadata: Object.keys(updatedMetadata).length > 0 ? updatedMetadata : null,
       },
     });
 

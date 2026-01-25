@@ -18,13 +18,27 @@ import {
   RefreshCw,
   Link as LinkIcon,
   XCircle,
+  HelpCircle,
 } from 'lucide-react';
+import { extractFAQsFromMDX } from '@/lib/faqExtractor';
+import { getAllAuthors } from '@/lib/authors';
 
 interface Category {
   id: string;
   name: string;
   slug: string;
   description?: string;
+}
+
+interface CustomAuthor {
+  name: string;
+  bio: string;
+  avatarUrl: string;
+  social?: {
+    twitter?: string;
+    website?: string;
+    linkedin?: string;
+  };
 }
 
 interface PostData {
@@ -41,6 +55,8 @@ interface PostData {
   scheduledAt: string;
   metaTitle: string;
   metaDescription: string;
+  authorId?: string; // Author ID from lib/authors.ts or 'custom'
+  customAuthor?: CustomAuthor; // Custom author data if authorId is 'custom'
 }
 
 interface PostEditorProps {
@@ -61,6 +77,8 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   const [showImageModal, setShowImageModal] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showImageManagement, setShowImageManagement] = useState(false);
+  const [showFAQManagement, setShowFAQManagement] = useState(false);
+  const [syncingFAQs, setSyncingFAQs] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [slugExists, setSlugExists] = useState(false);
   const [imageFileSize, setImageFileSize] = useState<number | null>(null);
@@ -96,7 +114,10 @@ export default function PostEditor({ initialData }: PostEditorProps) {
     scheduledAt: initialData?.scheduledAt || '',
     metaTitle: initialData?.metaTitle || '',
     metaDescription: initialData?.metaDescription || '',
+    authorId: initialData?.authorId || '', // Empty = default to editorial team
+    customAuthor: initialData?.customAuthor,
   });
+  const [showAuthorFields, setShowAuthorFields] = useState(false);
   const [tagInput, setTagInput] = useState('');
 
   // Character count helpers
@@ -556,6 +577,39 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   // Get all images from current content (memoized to avoid re-extracting on every render)
   const contentImages = extractImagesFromContent(formData.content);
 
+  // Extract FAQs from content
+  const contentFAQs = extractFAQsFromMDX(formData.content);
+  
+  // Combine FAQs (currently only from content, metadata support can be added later)
+  const allFAQs = contentFAQs;
+
+  // Sync FAQs to database
+  const handleSyncFAQs = async () => {
+    if (!initialData?.id) {
+      alert('Please save the post first before syncing FAQs');
+      return;
+    }
+
+    setSyncingFAQs(true);
+    try {
+      const res = await fetch(`/api/admin/posts/${initialData.id}/sync-faqs`, {
+        method: 'POST',
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        showNotification('success', `FAQs synced: ${data.created} created, ${data.updated} updated, ${data.deleted} deleted`);
+      } else {
+        const error = await res.json();
+        showNotification('error', error.error || 'Failed to sync FAQs');
+      }
+    } catch {
+      showNotification('error', 'Network error while syncing FAQs');
+    } finally {
+      setSyncingFAQs(false);
+    }
+  };
+
   const showNotification = (type: 'success' | 'error', message: string) => {
     setSaveNotification({ show: true, type, message });
     
@@ -579,10 +633,30 @@ export default function PostEditor({ initialData }: PostEditorProps) {
     // Save as draft first (without publishing)
     setSaving(true);
     try {
-      const payload = {
+      // Prepare author data for metadata
+      const authorMetadata: {
+        authorId?: string;
+        customAuthor?: CustomAuthor;
+      } = {};
+      if (formData.authorId && formData.authorId !== 'custom') {
+        authorMetadata.authorId = formData.authorId;
+      } else if (formData.authorId === 'custom' && formData.customAuthor) {
+        authorMetadata.authorId = 'custom';
+        authorMetadata.customAuthor = formData.customAuthor;
+      }
+
+      const payload: Omit<PostData, 'scheduledAt'> & {
+        published: boolean;
+        scheduledAt: string | null;
+        metadata?: {
+          authorId?: string;
+          customAuthor?: CustomAuthor;
+        };
+      } = {
         ...formData,
         published: false,
         scheduledAt: formData.scheduledAt || null,
+        metadata: Object.keys(authorMetadata).length > 0 ? authorMetadata : undefined,
       };
 
       const url = initialData?.id
@@ -613,10 +687,31 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   const handleSubmit = async (publish: boolean) => {
     setSaving(true);
     try {
-      const payload = {
+      // Prepare author data for metadata
+      const authorMetadata: {
+        authorId?: string;
+        customAuthor?: CustomAuthor;
+      } = {};
+      if (formData.authorId && formData.authorId !== 'custom') {
+        authorMetadata.authorId = formData.authorId;
+      } else if (formData.authorId === 'custom' && formData.customAuthor) {
+        authorMetadata.authorId = 'custom';
+        authorMetadata.customAuthor = formData.customAuthor;
+      }
+      // If authorId is empty/undefined, it defaults to editorial team (handled server-side)
+
+      const payload: Omit<PostData, 'scheduledAt'> & {
+        published: boolean;
+        scheduledAt: string | null;
+        metadata?: {
+          authorId?: string;
+          customAuthor?: CustomAuthor;
+        };
+      } = {
         ...formData,
         published: publish,
         scheduledAt: formData.scheduledAt || null,
+        metadata: Object.keys(authorMetadata).length > 0 ? authorMetadata : undefined,
       };
 
       const url = initialData?.id
@@ -1043,6 +1138,226 @@ export default function PostEditor({ initialData }: PostEditorProps) {
             </div>
           </div>
         )}
+
+        {/* Author Selection */}
+        <button
+          type="button"
+          onClick={() => setShowAuthorFields(!showAuthorFields)}
+          className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-emerald-500/10"
+        >
+          <span className="font-medium text-white">
+            Author Attribution
+            {formData.authorId && formData.authorId !== 'custom' && (
+              <span className="text-gray-500 font-normal ml-2">
+                ({getAllAuthors().find(a => a.id === formData.authorId)?.name || 'Custom'})
+              </span>
+            )}
+            {formData.authorId === 'custom' && formData.customAuthor?.name && (
+              <span className="text-gray-500 font-normal ml-2">
+                ({formData.customAuthor.name})
+              </span>
+            )}
+            {!formData.authorId && (
+              <span className="text-gray-500 font-normal ml-2">(Editorial Team - Default)</span>
+            )}
+          </span>
+          <span className="text-gray-500">{showAuthorFields ? '−' : '+'}</span>
+        </button>
+        {showAuthorFields && (
+          <div className="px-6 pb-6 space-y-4 border-t border-emerald-500/20 pt-4">
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Select Author
+                <span className="text-gray-400 text-xs font-normal ml-2">
+                  (Leave empty for Editorial Team - Default)
+                </span>
+              </label>
+              <select
+                value={formData.authorId || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    authorId: value || undefined,
+                    customAuthor: value === 'custom' ? (prev.customAuthor || {
+                      name: '',
+                      bio: '',
+                      avatarUrl: '',
+                      social: {},
+                    }) : undefined,
+                  }));
+                }}
+                className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="">Editorial Team (Default)</option>
+                {getAllAuthors().map((author) => (
+                  <option key={author.id} value={author.id}>
+                    {author.name}
+                  </option>
+                ))}
+                <option value="custom">Custom Author</option>
+              </select>
+              <p className="text-xs text-gray-400 mt-1">
+                Select an existing author or choose &quot;Custom Author&quot; to enter details manually.
+                Leave empty to use the default Editorial Team.
+              </p>
+            </div>
+
+            {/* Custom Author Fields */}
+            {formData.authorId === 'custom' && (
+              <div className="space-y-4 pt-4 border-t border-emerald-500/20">
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-emerald-300">
+                    <strong>Google E-E-A-T Requirements:</strong> For best SEO, include author name, bio with credentials, and social links.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Author Name <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.customAuthor?.name || ''}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        customAuthor: {
+                          ...(prev.customAuthor || { name: '', bio: '', avatarUrl: '', social: {} }),
+                          name: e.target.value,
+                        },
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    placeholder="e.g., Dr. Jane Smith, RD"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Author Bio <span className="text-red-400">*</span>
+                    <span className="text-gray-400 text-xs font-normal ml-2">
+                      (Include credentials and expertise)
+                    </span>
+                  </label>
+                  <textarea
+                    value={formData.customAuthor?.bio || ''}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        customAuthor: {
+                          ...(prev.customAuthor || { name: '', bio: '', avatarUrl: '', social: {} }),
+                          bio: e.target.value,
+                        },
+                      }))
+                    }
+                    rows={4}
+                    className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                    placeholder="e.g., Registered dietitian with 10+ years of experience in clinical nutrition..."
+                    required
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    Include professional credentials, years of experience, and areas of expertise.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Avatar URL
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.customAuthor?.avatarUrl || ''}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        customAuthor: {
+                          ...(prev.customAuthor || { name: '', bio: '', avatarUrl: '', social: {} }),
+                          avatarUrl: e.target.value,
+                        },
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    placeholder="https://example.com/avatar.jpg"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Social Links (Optional but recommended for E-E-A-T)
+                  </label>
+                  
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Website</label>
+                    <input
+                      type="url"
+                      value={formData.customAuthor?.social?.website || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          customAuthor: {
+                            ...(prev.customAuthor || { name: '', bio: '', avatarUrl: '', social: {} }),
+                            social: {
+                              ...(prev.customAuthor?.social || {}),
+                              website: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="https://example.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Twitter/X</label>
+                    <input
+                      type="url"
+                      value={formData.customAuthor?.social?.twitter || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          customAuthor: {
+                            ...(prev.customAuthor || { name: '', bio: '', avatarUrl: '', social: {} }),
+                            social: {
+                              ...(prev.customAuthor?.social || {}),
+                              twitter: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="https://twitter.com/username"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">LinkedIn</label>
+                    <input
+                      type="url"
+                      value={formData.customAuthor?.social?.linkedin || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          customAuthor: {
+                            ...(prev.customAuthor || { name: '', bio: '', avatarUrl: '', social: {} }),
+                            social: {
+                              ...(prev.customAuthor?.social || {}),
+                              linkedin: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="https://linkedin.com/in/username"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Image Management */}
@@ -1142,6 +1457,103 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                   <p className="text-xs text-emerald-400">
                     <strong>💡 SEO Tip:</strong> Write descriptive alt text that explains what&apos;s in the image. 
                     Include relevant keywords naturally, but prioritize clarity and context for screen readers.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* FAQ Management */}
+      <div className="bg-black rounded-xl shadow-sm border border-emerald-500/20 overflow-hidden">
+        <button
+          onClick={() => setShowFAQManagement(!showFAQManagement)}
+          className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-emerald-500/10"
+        >
+          <span className="font-medium text-white flex items-center gap-2">
+            <HelpCircle className="h-4 w-4" />
+            Manage FAQs ({allFAQs.length})
+          </span>
+          <span className="text-gray-500">{showFAQManagement ? '−' : '+'}</span>
+        </button>
+        {showFAQManagement && (
+          <div className="px-6 pb-6 border-t border-emerald-500/20 pt-4">
+            {allFAQs.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <HelpCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p className="text-sm">No FAQs found in post content.</p>
+                <p className="text-xs mt-1">
+                  Add FAQSection components to your MDX content or add FAQs to metadata.
+                </p>
+                <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-left">
+                  <p className="text-xs text-emerald-400 mb-2">
+                    <strong>Example MDX usage:</strong>
+                  </p>
+                  <pre className="text-xs text-gray-300 bg-zinc-900 p-2 rounded overflow-x-auto">
+{`<FAQSection
+  items={[
+    {
+      question: "Your question?",
+      answer: "Your answer."
+    }
+  ]}
+/>`}
+                  </pre>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-sm text-emerald-400">
+                    Found {allFAQs.length} FAQ{allFAQs.length !== 1 ? 's' : ''} in your content.
+                  </p>
+                  {initialData?.id && (
+                    <button
+                      onClick={handleSyncFAQs}
+                      disabled={syncingFAQs}
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                    >
+                      {syncingFAQs ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Syncing...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          Sync to Database
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  {allFAQs.map((faq, index) => (
+                    <div
+                      key={index}
+                      className="border border-emerald-500/30 rounded-lg p-4 bg-zinc-900/50 space-y-2"
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
+                          #{index + 1}
+                        </span>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-white mb-1">
+                            {faq.question}
+                          </p>
+                          <p className="text-xs text-gray-400 leading-relaxed">
+                            {faq.answer}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                  <p className="text-xs text-emerald-400">
+                    <strong>💡 SEO Tip:</strong> FAQs are automatically extracted from your MDX content. 
+                    Click &quot;Sync to Database&quot; to store them in the database for better performance and schema generation.
                   </p>
                 </div>
               </div>
