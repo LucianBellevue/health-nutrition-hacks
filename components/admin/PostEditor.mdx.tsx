@@ -60,6 +60,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   const [showScheduling, setShowScheduling] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showImageManagement, setShowImageManagement] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [slugExists, setSlugExists] = useState(false);
   const [imageFileSize, setImageFileSize] = useState<number | null>(null);
@@ -489,6 +490,71 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       preview: '',
     });
   };
+
+  // Extract all Image components from content
+  interface ExtractedImage {
+    id: string;
+    src: string;
+    alt: string;
+    width?: string;
+    height?: string;
+    className?: string;
+    fullMatch: string;
+    startIndex: number;
+  }
+
+  const extractImagesFromContent = (content: string): ExtractedImage[] => {
+    const images: ExtractedImage[] = [];
+    // Match Image components (handles multiline): <Image ... />
+    // Using a more flexible regex that handles multiline attributes
+    const imageRegex = /<Image\s+([\s\S]*?)\s*\/>/g;
+    let match;
+
+    while ((match = imageRegex.exec(content)) !== null) {
+      const attributes = match[1];
+      const srcMatch = attributes.match(/src=["']([^"']+)["']/);
+      const altMatch = attributes.match(/alt=["']([^"']*)["']/);
+      const widthMatch = attributes.match(/width=\{?(\d+)\}?/);
+      const heightMatch = attributes.match(/height=\{?(\d+)\}?/);
+      const classNameMatch = attributes.match(/className=["']([^"']+)["']/);
+
+      if (srcMatch) {
+        // Create stable ID based on src and position
+        const stableId = `img-${srcMatch[1].substring(0, 20).replace(/[^a-zA-Z0-9]/g, '')}-${match.index}`;
+        images.push({
+          id: stableId,
+          src: srcMatch[1],
+          alt: altMatch ? altMatch[1] : '',
+          width: widthMatch ? widthMatch[1] : undefined,
+          height: heightMatch ? heightMatch[1] : undefined,
+          className: classNameMatch ? classNameMatch[1] : undefined,
+          fullMatch: match[0],
+          startIndex: match.index || 0,
+        });
+      }
+    }
+
+    return images;
+  };
+
+  // Update alt text for a specific image in content
+  const updateImageAltText = (content: string, imageIndex: number, newAltText: string): string => {
+    const images = extractImagesFromContent(content);
+    if (imageIndex < 0 || imageIndex >= images.length) return content;
+
+    const image = images[imageIndex];
+    // Escape special characters in alt text for regex
+    const escapedAlt = image.alt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Replace the alt attribute in the full match
+    const altRegex = new RegExp(`(alt=["'])${escapedAlt}(["'])`, 'g');
+    const newImageMatch = image.fullMatch.replace(altRegex, `$1${newAltText}$2`);
+    
+    // Replace the original match with the updated one
+    return content.replace(image.fullMatch, newImageMatch);
+  };
+
+  // Get all images from current content (memoized to avoid re-extracting on every render)
+  const contentImages = extractImagesFromContent(formData.content);
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setSaveNotification({ show: true, type, message });
@@ -975,6 +1041,111 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                 placeholder="Override the default description for search engines"
               />
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Image Management */}
+      <div className="bg-black rounded-xl shadow-sm border border-emerald-500/20 overflow-hidden">
+        <button
+          onClick={() => setShowImageManagement(!showImageManagement)}
+          className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-emerald-500/10"
+        >
+          <span className="font-medium text-white flex items-center gap-2">
+            <ImagePlus className="h-4 w-4" />
+            Manage Images ({contentImages.length})
+          </span>
+          <span className="text-gray-500">{showImageManagement ? '−' : '+'}</span>
+        </button>
+        {showImageManagement && (
+          <div className="px-6 pb-6 border-t border-emerald-500/20 pt-4">
+            {contentImages.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <ImagePlus className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p className="text-sm">No images found in post content.</p>
+                <p className="text-xs mt-1">Use the &quot;Insert Image&quot; button to add images to your post.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-sm text-emerald-400 mb-4">
+                  Edit alt text for all images in your post. Good alt text improves accessibility and SEO.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {contentImages.map((img, index) => (
+                    <div
+                      key={img.id}
+                      className="border border-emerald-500/30 rounded-lg p-4 bg-zinc-900/50 space-y-3"
+                    >
+                      <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-800">
+                        <img
+                          src={img.src}
+                          alt={img.alt || 'Image preview'}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="450"%3E%3Crect fill="%23334155" width="800" height="450"/%3E%3Ctext fill="%2394a3b8" x="50%25" y="50%25" text-anchor="middle" dy=".3em" font-size="16"%3EImage not found%3C/text%3E%3C/svg%3E';
+                          }}
+                        />
+                        <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                          #{index + 1}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-white mb-1">
+                          Alt Text <span className="text-gray-500">(required for SEO & accessibility)</span>
+                        </label>
+                        <textarea
+                          value={img.alt}
+                          onChange={(e) => {
+                            const newAltText = e.target.value;
+                            const imageIndex = contentImages.findIndex((i) => i.id === img.id);
+                            const updatedContent = updateImageAltText(
+                              formData.content,
+                              imageIndex,
+                              newAltText
+                            );
+                            setFormData((prev) => ({ ...prev, content: updatedContent }));
+                          }}
+                          rows={2}
+                          className="w-full px-3 py-2 text-sm border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                          placeholder="Describe the image for accessibility and SEO..."
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          {img.alt.length} characters
+                          {img.alt.length < 10 && (
+                            <span className="text-amber-500 ml-1">• Consider adding more detail</span>
+                          )}
+                        </p>
+                      </div>
+                      <div className="text-xs text-gray-400 space-y-1">
+                        <div className="truncate">
+                          <span className="text-gray-500">Source:</span>{' '}
+                          <a
+                            href={img.src}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-emerald-400 hover:text-emerald-300 underline"
+                          >
+                            {img.src.length > 50 ? `${img.src.substring(0, 50)}...` : img.src}
+                          </a>
+                        </div>
+                        {(img.width || img.height) && (
+                          <div>
+                            <span className="text-gray-500">Dimensions:</span>{' '}
+                            {img.width} × {img.height}px
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                  <p className="text-xs text-emerald-400">
+                    <strong>💡 SEO Tip:</strong> Write descriptive alt text that explains what&apos;s in the image. 
+                    Include relevant keywords naturally, but prioritize clarity and context for screen readers.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
