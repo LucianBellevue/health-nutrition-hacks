@@ -46,65 +46,67 @@ const nextConfig: NextConfig = {
   // External packages (moved from experimental in Next.js 16)
   serverExternalPackages: ['prisma', '@prisma/client'],
   // Turbopack configuration (Next.js 16 default bundler)
-  turbopack: {},
-  // Webpack optimizations for better code splitting
-  webpack: (config, { dev, isServer }) => {
-    if (!dev && !isServer) {
-      // Optimize chunk splitting
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: 'deterministic',
-        runtimeChunk: { name: 'runtime' },
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Separate vendor chunks
-            framework: {
-              name: 'framework',
-              chunks: 'all',
-              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|next)[\\/]/,
-              priority: 40,
-              enforce: true,
-            },
-            // Third-party libraries
-            lib: {
-              test: /[\\/]node_modules[\\/]/,
-              name(module: { context: string }) {
-                const packageName = module.context.match(
-                  /[\\/]node_modules[\\/](.*?)([\\/]|$)/
-                )?.[1];
-                return `npm.${packageName?.replace('@', '')}`;
+  // Use Turbopack for development (better with Tailwind v4)
+  // Webpack is only used for production builds when explicitly needed
+  ...(process.env.NODE_ENV === 'production' && process.env.USE_WEBPACK === 'true' ? {
+    webpack: (config, { dev, isServer }) => {
+      if (!dev && !isServer) {
+        // Optimize chunk splitting
+        config.optimization = {
+          ...config.optimization,
+          moduleIds: 'deterministic',
+          runtimeChunk: { name: 'runtime' },
+          splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+              default: false,
+              vendors: false,
+              // Separate vendor chunks
+              framework: {
+                name: 'framework',
+                chunks: 'all',
+                test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|next)[\\/]/,
+                priority: 40,
+                enforce: true,
               },
-              priority: 30,
-              minChunks: 1,
-              reuseExistingChunk: true,
+              // Third-party libraries
+              lib: {
+                test: /[\\/]node_modules[\\/]/,
+                name(module: { context: string }) {
+                  const packageName = module.context.match(
+                    /[\\/]node_modules[\\/](.*?)([\\/]|$)/
+                  )?.[1];
+                  return `npm.${packageName?.replace('@', '')}`;
+                },
+                priority: 30,
+                minChunks: 1,
+                reuseExistingChunk: true,
+              },
+              // Common components
+              commons: {
+                name: 'commons',
+                minChunks: 2,
+                priority: 20,
+                reuseExistingChunk: true,
+              },
+              // Separate styles chunk
+              styles: {
+                name: 'styles',
+                test: /\.(css|scss|sass)$/,
+                chunks: 'all',
+                enforce: true,
+                priority: 50,
+              },
             },
-            // Common components
-            commons: {
-              name: 'commons',
-              minChunks: 2,
-              priority: 20,
-              reuseExistingChunk: true,
-            },
-            // Separate styles chunk
-            styles: {
-              name: 'styles',
-              test: /\.(css|scss|sass)$/,
-              chunks: 'all',
-              enforce: true,
-              priority: 50,
-            },
+            maxInitialRequests: 25,
+            minSize: 20000,
           },
-          maxInitialRequests: 25,
-          minSize: 20000,
-        },
-        minimize: true,
-      };
-    }
-    return config;
-  },
+          minimize: true,
+        };
+      }
+      return config;
+    },
+  } : {}),
   experimental: {
     // Optimize package imports for smaller bundles and better tree-shaking
     optimizePackageImports: [
@@ -118,7 +120,7 @@ const nextConfig: NextConfig = {
     ],
     // Inline critical CSS to reduce render-blocking
     optimizeCss: true,
-    // CSS optimization (true for enabled, 'strict' for strict mode)
+    // CSS optimization - enabled for better performance with Tailwind v4
     cssChunking: true,
   },
   // Redirects for SEO consistency - www redirects to non-www (canonical)

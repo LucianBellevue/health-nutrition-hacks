@@ -2,6 +2,27 @@
  * Critical CSS component to be inlined in the document head
  * This eliminates render-blocking CSS for faster FCP/LCP
  * Only includes styles needed for above-the-fold content
+ *
+ * CRITICAL RULES TO PREVENT TAILWIND CONFLICTS:
+ * ============================================
+ *
+ * 1. NEVER add padding, margin, border-width to element selectors here
+ *    - These will override Tailwind utilities and break styling
+ *    - Example: padding:0 on buttons breaks px-4, py-2, etc.
+ *
+ * 2. ONLY include absolutely critical styles:
+ *    - CSS custom properties (--variables)
+ *    - box-sizing for layout
+ *    - Font inheritance settings
+ *    - Basic display/flex properties
+ *
+ * 3. Keep this as MINIMAL as possible
+ *    - More styles here = higher chance of Tailwind conflicts
+ *    - Put element resets in globals.css @layer base instead
+ *
+ * 4. These inline styles load BEFORE Tailwind CSS
+ *    - They have HIGHER specificity due to load order
+ *    - Avoid element selectors that could conflict with utility classes
  */
 export function CriticalCSS() {
   return (
@@ -16,10 +37,7 @@ export function CriticalCSS() {
         --foreground:#fafafa
       }
       *,::before,::after{
-        box-sizing:border-box;
-        border-width:0;
-        border-style:solid;
-        border-color:currentColor
+        box-sizing:border-box
       }
       html{
         -webkit-text-size-adjust:100%;
@@ -46,12 +64,9 @@ export function CriticalCSS() {
         flex-direction:column
       }
       h1,h2,h3,h4,h5,h6{
-        font-size:inherit;
-        font-weight:inherit;
         margin:0
       }
       a{
-        color:inherit;
         text-decoration:inherit
       }
       img,svg,video{
@@ -64,9 +79,6 @@ export function CriticalCSS() {
         font-family:inherit;
         font-size:100%;
         line-height:inherit;
-        color:inherit;
-        margin:0;
-        padding:0
       }
       .antialiased{
         -webkit-font-smoothing:antialiased;

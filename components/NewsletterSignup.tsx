@@ -125,7 +125,7 @@ export default function NewsletterSignup({
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-              <div className="flex-1">
+              <div className="flex-1" suppressHydrationWarning>
                 <input
                   type="email"
                   value={email}

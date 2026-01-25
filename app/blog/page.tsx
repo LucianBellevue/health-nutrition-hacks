@@ -2,8 +2,6 @@ import { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import { getAllPosts, getAllCategories } from '@/lib/db-posts';
 import BlogList from '@/components/BlogList';
-import Pagination from '@/components/Pagination';
-import Link from 'next/link';
 
 // Dynamic imports for non-critical components to reduce initial JS bundle
 const NewsletterSignup = dynamic(() => import('@/components/NewsletterSignup'), {
@@ -56,37 +54,12 @@ interface BlogPageProps {
  * Blog index page - lists all blog posts with search, filters, and pagination
  */
 export default async function BlogPage({ searchParams }: BlogPageProps) {
-  const params = await searchParams;
+  await searchParams; // Required by Next.js async searchParams pattern
   const allPosts = await getAllPosts();
   const categories = await getAllCategories();
 
-  // Parse page number from query params
-  const currentPage = Math.max(1, parseInt(params.page || '1', 10));
-
-  // Calculate pagination
-  const totalPosts = allPosts.length;
-  const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
-  const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-  const endIndex = startIndex + POSTS_PER_PAGE;
-
-  // Get posts for current page
-  const postsForPage = allPosts.slice(startIndex, endIndex);
-  const postsMetadata = postsForPage.map((post) => post.metadata);
-
-  // If page number is out of bounds, show empty state
-  if (currentPage > totalPages && totalPosts > 0) {
-    return (
-      <div className="min-h-screen">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center py-12">
-            <p className="text-zinc-600 text-lg">
-              Page not found. <Link href="/blog" className="text-emerald-600 hover:underline">Return to page 1</Link>
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Get all posts metadata (no server-side pagination - let client handle it after filtering)
+  const postsMetadata = allPosts.map((post) => post.metadata);
 
   return (
     <div className="min-h-screen">
@@ -107,23 +80,16 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         </div>
 
         {/* Blog List with Filters (Client Component) */}
-        {totalPosts === 0 ? (
+        {postsMetadata.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-zinc-700 dark:text-zinc-300 text-lg">No posts yet. Check back soon!</p>
           </div>
         ) : (
           <>
-            <BlogList posts={postsMetadata} categories={categories} />
+            <BlogList posts={postsMetadata} categories={categories} postsPerPage={POSTS_PER_PAGE} />
             
             {/* Multiplex Ad */}
             <AdSenseMultiplex />
-            
-            {/* Pagination */}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              basePath="/blog"
-            />
           </>
         )}
       </div>

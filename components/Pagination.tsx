@@ -3,18 +3,23 @@ import Link from 'next/link';
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  basePath: string;
+  basePath?: string;
+  onPageChange?: (page: number) => void;
 }
 
 /**
  * Pagination component for navigating between pages
+ * Supports both server-side (URL-based) and client-side (callback-based) pagination
  */
 export default function Pagination({
   currentPage,
   totalPages,
   basePath,
+  onPageChange,
 }: PaginationProps) {
   if (totalPages <= 1) return null;
+
+  const isClientSide = !!onPageChange;
 
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
@@ -47,12 +52,21 @@ export default function Pagination({
     <div className="flex items-center justify-center gap-2 mt-12">
       {/* Previous Button */}
       {currentPage > 1 ? (
-        <Link
-          href={`${basePath}?page=${currentPage - 1}`}
-          className="px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-400 transition-colors font-medium"
-        >
-          Previous
-        </Link>
+        isClientSide ? (
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            className="px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-400 transition-colors font-medium"
+          >
+            Previous
+          </button>
+        ) : (
+          <Link
+            href={`${basePath}?page=${currentPage - 1}`}
+            className="px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-400 transition-colors font-medium"
+          >
+            Previous
+          </Link>
+        )
       ) : (
         <button
           disabled
@@ -79,7 +93,19 @@ export default function Pagination({
           const pageNum = page as number;
           const isActive = pageNum === currentPage;
 
-          return (
+          return isClientSide ? (
+            <button
+              key={pageNum}
+              onClick={() => onPageChange(pageNum)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-emerald-600 dark:bg-emerald-500 text-white'
+                  : 'border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-400'
+              }`}
+            >
+              {pageNum}
+            </button>
+          ) : (
             <Link
               key={pageNum}
               href={`${basePath}?page=${pageNum}`}
@@ -97,12 +123,21 @@ export default function Pagination({
 
       {/* Next Button */}
       {currentPage < totalPages ? (
-        <Link
-          href={`${basePath}?page=${currentPage + 1}`}
-          className="px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-400 transition-colors font-medium"
-        >
-          Next
-        </Link>
+        isClientSide ? (
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            className="px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-400 transition-colors font-medium"
+          >
+            Next
+          </button>
+        ) : (
+          <Link
+            href={`${basePath}?page=${currentPage + 1}`}
+            className="px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-400 transition-colors font-medium"
+          >
+            Next
+          </Link>
+        )
       ) : (
         <button
           disabled

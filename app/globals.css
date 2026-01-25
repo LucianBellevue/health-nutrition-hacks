@@ -1,7 +1,18 @@
 @import "tailwindcss";
 
+/* 
+ * CSS Layer Priority (Tailwind v4):
+ * 1. @layer base (lowest priority - base element resets)
+ * 2. @layer components (medium priority - custom component classes)
+ * 3. Tailwind utilities (highest priority - always override)
+ * 
+ * Tailwind utilities will ALWAYS override @layer base and @layer components
+ * unless you use !important in those layers (which you shouldn't).
+ */
+
 /* Critical styles are inlined in layout.tsx for faster initial paint */
 @layer base {
+  /* CSS Custom Properties - these don't conflict with utilities */
   :root {
     --background: #ecfdf5;
     --foreground: #18181b;
@@ -11,6 +22,38 @@
     --background: #09090b;
     --foreground: #fafafa;
   }
+
+  /* 
+   * Element resets - MINIMAL to avoid conflicts with Tailwind utilities
+   * These are LOW SPECIFICITY and will be overridden by Tailwind classes
+   */
+  button,
+  input,
+  textarea,
+  select {
+    background-color: transparent;
+    background-image: none;
+  }
+
+  button:focus,
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  /* Reset borders to allow Tailwind border utilities to work */
+  input,
+  textarea,
+  select {
+    border-width: 0;
+  }
+
+  /* Allow links to be styled with Tailwind color utilities */
+  a {
+    color: inherit;
+  }
 }
 
 @theme inline {
@@ -19,6 +62,10 @@
   --font-sans: var(--font-montserrat);
 }
 
+/* 
+ * Body styles outside @layer have medium specificity
+ * Tailwind utilities will still override these
+ */
 body {
   background: var(--background);
   color: var(--foreground);
@@ -28,8 +75,16 @@ body {
   will-change: background-color, color;
 }
 
-/* Prose heading styles - lower priority layer */
+/* 
+ * Custom component styles - scoped to specific selectors
+ * These should ONLY apply to prose/article content, not general elements
+ * 
+ * WARNING: !important is used here to ensure prose styles apply consistently
+ * This is acceptable for prose content as it's a specific, scoped use case
+ * DO NOT use !important for general element styles
+ */
 @layer components {
+  /* Only apply to content within article tags or .prose class */
   article h2,
   .prose h2 {
     font-size: 1.875rem !important;
@@ -70,3 +125,26 @@ body {
     }
   }
 }
+
+/* 
+ * ============================================================================
+ * IMPORTANT: Tailwind Utility Class Priority
+ * ============================================================================
+ * 
+ * Tailwind utilities will ALWAYS override:
+ * - @layer base styles
+ * - @layer components styles (without !important)
+ * - Regular CSS selectors
+ * 
+ * To ensure Tailwind utilities work:
+ * 1. NEVER add element-level styles outside @layer base
+ * 2. NEVER use !important in @layer base
+ * 3. ONLY use !important in @layer components for specific scoped styles
+ * 4. Always test that utility classes like bg-*, px-*, border-* work
+ * 
+ * Examples:
+ * - <button class="bg-emerald-600 px-4 py-2"> WILL override @layer base button styles
+ * - <input class="border border-zinc-200 px-3"> WILL override @layer base input styles
+ * - <div class="text-red-500"> WILL override any color from @layer base or components
+ * ============================================================================
+ */

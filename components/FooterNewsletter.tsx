@@ -95,7 +95,7 @@ export default function FooterNewsletter() {
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+          className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
         >
           {status === 'loading' ? '...' : 'Join'}
         </button>
