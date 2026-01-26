@@ -374,12 +374,12 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setFeaturedImageData({
+      setFeaturedImageData((prev) => ({
         file,
         preview: reader.result as string,
         isDragging: false,
-        altText: '',
-      });
+        altText: prev.altText || '', // Preserve existing alt text if any
+      }));
     };
     reader.readAsDataURL(file);
   };
@@ -675,19 +675,27 @@ export default function PostEditor({ initialData }: PostEditorProps) {
         authorMetadata.authorId = 'custom';
         authorMetadata.customAuthor = formData.customAuthor;
       }
+      // If authorId is empty/undefined, it defaults to editorial team (handled server-side)
+
+      // Merge existing metadata (featuredImageAlt, etc.) with author metadata
+      const existingMetadata = formData.metadata && typeof formData.metadata === 'object'
+        ? { ...(formData.metadata as Record<string, unknown>) }
+        : {};
+      
+      const mergedMetadata = {
+        ...existingMetadata,
+        ...authorMetadata,
+      };
 
       const payload: Omit<PostData, 'scheduledAt'> & {
         published: boolean;
         scheduledAt: string | null;
-        metadata?: {
-          authorId?: string;
-          customAuthor?: CustomAuthor;
-        };
+        metadata?: Record<string, unknown>;
       } = {
         ...formData,
         published: false,
         scheduledAt: formData.scheduledAt || null,
-        metadata: Object.keys(authorMetadata).length > 0 ? authorMetadata : undefined,
+        metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
       };
 
       const url = initialData?.id
