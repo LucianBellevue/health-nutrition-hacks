@@ -687,14 +687,24 @@ export default function PostEditor({ initialData }: PostEditorProps) {
         ...authorMetadata,
       };
 
-      const payload: Omit<PostData, 'scheduledAt'> & {
+      // Construct payload with only fields expected by API, excluding id, authorId, customAuthor
+      const payload: Omit<PostData, 'scheduledAt' | 'id' | 'authorId' | 'customAuthor'> & {
         published: boolean;
         scheduledAt: string | null;
         metadata?: Record<string, unknown>;
       } = {
-        ...formData,
+        title: formData.title,
+        slug: formData.slug,
+        description: formData.description,
+        content: formData.content,
+        format: formData.format,
+        categoryId: formData.categoryId,
+        tags: formData.tags,
+        image: formData.image,
         published: false,
         scheduledAt: formData.scheduledAt || null,
+        metaTitle: formData.metaTitle,
+        metaDescription: formData.metaDescription,
         metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
       };
 
@@ -749,14 +759,24 @@ export default function PostEditor({ initialData }: PostEditorProps) {
         ...authorMetadata,
       };
 
-      const payload: Omit<PostData, 'scheduledAt'> & {
+      // Construct payload with only fields expected by API, excluding id, authorId, customAuthor
+      const payload: Omit<PostData, 'scheduledAt' | 'id' | 'authorId' | 'customAuthor'> & {
         published: boolean;
         scheduledAt: string | null;
         metadata?: Record<string, unknown>;
       } = {
-        ...formData,
+        title: formData.title,
+        slug: formData.slug,
+        description: formData.description,
+        content: formData.content,
+        format: formData.format,
+        categoryId: formData.categoryId,
+        tags: formData.tags,
+        image: formData.image,
         published: publish,
         scheduledAt: formData.scheduledAt || null,
+        metaTitle: formData.metaTitle,
+        metaDescription: formData.metaDescription,
         metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
       };
 
