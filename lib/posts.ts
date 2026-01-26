@@ -13,6 +13,7 @@ export interface PostMetadata {
   category: string;
   tags?: string[];
   image?: string;
+  featuredImageAlt?: string;
   readingTime?: number;
   slug: string;
   faqs?: Array<{ question: string; answer: string }>;

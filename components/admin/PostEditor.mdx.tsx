@@ -57,6 +57,7 @@ interface PostData {
   metaDescription: string;
   authorId?: string; // Author ID from lib/authors.ts or 'custom'
   customAuthor?: CustomAuthor; // Custom author data if authorId is 'custom'
+  metadata?: Record<string, unknown>; // Additional metadata (featuredImageAlt, etc.)
 }
 
 interface PostEditorProps {
@@ -99,6 +100,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
     file: null as File | null,
     preview: '',
     isDragging: false,
+    altText: '',
   });
 
   const [formData, setFormData] = useState<PostData>({
@@ -116,6 +118,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
     metaDescription: initialData?.metaDescription || '',
     authorId: initialData?.authorId || '', // Empty = default to editorial team
     customAuthor: initialData?.customAuthor,
+    metadata: initialData?.metadata || {}, // Preserve existing metadata (featuredImageAlt, etc.)
   });
   const [showAuthorFields, setShowAuthorFields] = useState(false);
   const [tagInput, setTagInput] = useState('');
@@ -349,6 +352,16 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   };
 
   const handleOpenFeaturedImageModal = () => {
+    // Load existing alt text from metadata if available
+    const existingAltText = formData.metadata && typeof formData.metadata === 'object'
+      ? (formData.metadata as { featuredImageAlt?: string })?.featuredImageAlt || ''
+      : '';
+    
+    setFeaturedImageData((prev) => ({
+      ...prev,
+      altText: existingAltText,
+      preview: formData.image || '', // Show existing image if any
+    }));
     setShowFeaturedImageModal(true);
   };
 
@@ -365,6 +378,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
         file,
         preview: reader.result as string,
         isDragging: false,
+        altText: '',
       });
     };
     reader.readAsDataURL(file);
@@ -379,11 +393,12 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setFeaturedImageData({
+      setFeaturedImageData((prev) => ({
         file,
         preview: reader.result as string,
         isDragging: false,
-      });
+        altText: prev.altText || '', // Preserve existing alt text if any
+      }));
     };
     reader.readAsDataURL(file);
   };
@@ -413,12 +428,27 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
       if (res.ok) {
         const data = await res.json();
-        setFormData((prev) => ({ ...prev, image: data.url }));
+        setFormData((prev) => {
+          // Store image URL and alt text in metadata
+          const currentMetadata = (prev.metadata && typeof prev.metadata === 'object') 
+            ? { ...(prev.metadata as object) }
+            : {};
+          
+          return {
+            ...prev,
+            image: data.url,
+            metadata: {
+              ...currentMetadata,
+              featuredImageAlt: featuredImageData.altText || prev.title || 'Featured image',
+            },
+          };
+        });
         setShowFeaturedImageModal(false);
         setFeaturedImageData({
           file: null,
           preview: '',
           isDragging: false,
+          altText: '',
         });
       } else {
         alert('Failed to upload image to Cloudinary');
@@ -436,6 +466,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       file: null,
       preview: '',
       isDragging: false,
+      altText: '',
     });
   };
 
@@ -700,18 +731,25 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       }
       // If authorId is empty/undefined, it defaults to editorial team (handled server-side)
 
+      // Merge existing metadata (featuredImageAlt, etc.) with author metadata
+      const existingMetadata = formData.metadata && typeof formData.metadata === 'object'
+        ? { ...(formData.metadata as Record<string, unknown>) }
+        : {};
+      
+      const mergedMetadata = {
+        ...existingMetadata,
+        ...authorMetadata,
+      };
+
       const payload: Omit<PostData, 'scheduledAt'> & {
         published: boolean;
         scheduledAt: string | null;
-        metadata?: {
-          authorId?: string;
-          customAuthor?: CustomAuthor;
-        };
+        metadata?: Record<string, unknown>;
       } = {
         ...formData,
         published: publish,
         scheduledAt: formData.scheduledAt || null,
-        metadata: Object.keys(authorMetadata).length > 0 ? authorMetadata : undefined,
+        metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
       };
 
       const url = initialData?.id
@@ -1729,10 +1767,31 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               )}
             </div>
 
+            {/* Alt Text Input */}
+            {featuredImageData.preview && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-white">
+                  Alt Text <span className="text-emerald-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={featuredImageData.altText}
+                  onChange={(e) =>
+                    setFeaturedImageData((prev) => ({ ...prev, altText: e.target.value }))
+                  }
+                  placeholder="Describe the image for accessibility and SEO (e.g., 'Healthy breakfast bowl with fresh fruits and yogurt')"
+                  className="w-full px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                />
+                <p className="text-xs text-zinc-400">
+                  Good alt text helps with accessibility and SEO. Describe what&apos;s in the image clearly and concisely.
+                </p>
+              </div>
+            )}
+
             {/* Helper Text & File Size Warning */}
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
               <p className="text-sm text-blue-800 dark:text-blue-300">
-                <strong>Tip:</strong> For best results, use images at least 1200px wide. The featured image appears at the top of your post and in preview cards.
+                <strong>Tip:</strong> For best results, use images at least 1200px wide. The featured image appears at the top of your post and in preview cards. Images are automatically optimized and compressed by Cloudinary.
               </p>
             </div>
             {imageFileSize && imageFileSize > 500000 && (
@@ -1757,7 +1816,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               <button
                 type="button"
                 onClick={handleConfirmFeaturedImage}
-                disabled={!featuredImageData.file || uploading}
+                disabled={!featuredImageData.file || !featuredImageData.altText.trim() || uploading}
                 className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {uploading ? (

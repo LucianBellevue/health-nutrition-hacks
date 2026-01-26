@@ -155,6 +155,7 @@ export default async function PostPage({ params }: Props) {
   // Get author information from metadata or fallback to default
   let author;
   let shouldShowDisclosure = false; // Track if we should show AI disclosure
+  let featuredImageAlt: string | undefined;
   
   if (post.metadata && typeof post.metadata === 'object') {
     const metadata = post.metadata as { 
@@ -168,8 +169,12 @@ export default async function PostPage({ params }: Props) {
           twitter?: string; 
           linkedin?: string 
         } 
-      } 
+      };
+      featuredImageAlt?: string;
     };
+    
+    // Extract featured image alt text
+    featuredImageAlt = metadata.featuredImageAlt;
     
     // Check for custom author first (human author - no disclosure)
     if (metadata.customAuthor && metadata.authorId === 'custom') {
@@ -409,7 +414,7 @@ export default async function PostPage({ params }: Props) {
             <div className="aspect-video w-full rounded-xl overflow-hidden mb-8 shadow-lg">
               <Image
                 src={post.image}
-                alt={post.title}
+                alt={featuredImageAlt || post.title}
                 className="w-full h-full object-cover"
                 width={1200}
                 height={630}

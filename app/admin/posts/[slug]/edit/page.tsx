@@ -51,6 +51,9 @@ export default async function EditPostPage({
           customAuthor: post.metadata && typeof post.metadata === 'object' 
             ? (post.metadata as { customAuthor?: { name: string; bio: string; avatarUrl: string; social?: { website?: string; twitter?: string; linkedin?: string } } }).customAuthor 
             : undefined,
+          metadata: post.metadata && typeof post.metadata === 'object'
+            ? (post.metadata as Record<string, unknown>)
+            : undefined,
         }}
       />
     </div>

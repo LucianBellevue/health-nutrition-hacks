@@ -179,7 +179,11 @@ export default async function PreviewPage({ params }: Props) {
             <div className="aspect-video w-full rounded-xl overflow-hidden mb-8 shadow-lg">
               <Image
                 src={post.image}
-                alt={post.title}
+                alt={
+                  (post.metadata && typeof post.metadata === 'object' 
+                    ? (post.metadata as { featuredImageAlt?: string })?.featuredImageAlt 
+                    : undefined) || post.title
+                }
                 className="w-full h-full object-cover"
                 width={1200}
                 height={630}

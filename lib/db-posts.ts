@@ -10,6 +10,7 @@ export interface PostMetadata {
   category: string;
   tags?: string[];
   image?: string;
+  featuredImageAlt?: string; // Alt text for featured image
   readingTime?: number;
   slug: string;
 }
@@ -58,6 +59,11 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     ? post.updatedAt.toISOString().split('T')[0]
     : post.createdAt.toISOString().split('T')[0];
 
+  // Extract featured image alt text from metadata
+  const featuredImageAlt = post.metadata && typeof post.metadata === 'object'
+    ? (post.metadata as { featuredImageAlt?: string })?.featuredImageAlt
+    : undefined;
+
   return {
     metadata: {
       title: post.title,
@@ -69,6 +75,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       category: post.category.name,
       tags: post.tags,
       image: post.image || undefined,
+      featuredImageAlt,
       readingTime: post.readingTime || undefined,
       slug: post.slug,
     },
@@ -94,6 +101,11 @@ export async function getAllPosts(): Promise<Post[]> {
       ? post.updatedAt.toISOString().split('T')[0]
       : post.createdAt.toISOString().split('T')[0];
 
+    // Extract featured image alt text from metadata
+    const featuredImageAlt = post.metadata && typeof post.metadata === 'object'
+      ? (post.metadata as { featuredImageAlt?: string })?.featuredImageAlt
+      : undefined;
+
     return {
       metadata: {
         title: post.title,
@@ -105,6 +117,7 @@ export async function getAllPosts(): Promise<Post[]> {
         category: post.category.name,
         tags: post.tags,
         image: post.image || undefined,
+        featuredImageAlt,
         readingTime: post.readingTime || undefined,
         slug: post.slug,
       },

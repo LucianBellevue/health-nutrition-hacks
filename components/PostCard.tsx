@@ -33,7 +33,7 @@ function PostCard({ post }: PostCardProps) {
           <div className="aspect-16/10 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800 relative">
             <Image
               src={post.image}
-              alt={post.title}
+              alt={post.featuredImageAlt || post.title}
               fill
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
               className="object-cover group-hover:scale-105 transition-transform duration-500"
