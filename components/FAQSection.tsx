@@ -25,27 +25,27 @@ export default function FAQSection({ items, title = "Frequently Asked Questions"
   };
 
   return (
-    <section className="my-12 bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-6 sm:p-8 border border-zinc-200 dark:border-zinc-800">
-      <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-6">
+    <section className="my-8 sm:my-12">
+      <h2 className="text-xl sm:text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4 sm:mb-5">
         {title}
       </h2>
-      <div className="space-y-4">
+      <div className="space-y-2 sm:space-y-2.5">
         {items.map((item, index) => (
           <div
             key={index}
-            className="bg-white dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden transition-all"
+            className="group bg-white/60 dark:bg-zinc-900/40 backdrop-blur-sm rounded-lg border border-zinc-200/60 dark:border-zinc-800/60 overflow-hidden transition-all duration-200 hover:border-emerald-300/50 dark:hover:border-emerald-700/50 hover:shadow-sm"
           >
             <button
               onClick={() => toggleQuestion(index)}
-              className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+              className="w-full flex items-center justify-between p-3 sm:p-3.5 text-left transition-colors duration-150 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30"
               aria-expanded={openIndex === index}
               aria-controls={`faq-answer-${index}`}
             >
-              <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 pr-4">
+              <h3 className="text-sm sm:text-base font-medium text-zinc-900 dark:text-zinc-100 pr-3 leading-snug">
                 {item.question}
               </h3>
               <svg
-                className={`w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 transition-transform ${
+                className={`w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 transition-transform duration-200 ${
                   openIndex === index ? 'rotate-180' : ''
                 }`}
                 fill="none"
@@ -63,11 +63,11 @@ export default function FAQSection({ items, title = "Frequently Asked Questions"
             </button>
             <div
               id={`faq-answer-${index}`}
-              className={`overflow-hidden transition-all duration-300 ${
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
                 openIndex === index ? 'max-h-96' : 'max-h-0'
               }`}
             >
-              <div className="px-4 sm:px-5 pb-4 sm:pb-5 text-zinc-700 dark:text-zinc-300 leading-relaxed">
+              <div className="px-3 sm:px-3.5 pb-3 sm:pb-3.5 text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
                 {item.answer}
               </div>
             </div>

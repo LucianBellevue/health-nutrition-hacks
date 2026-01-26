@@ -124,18 +124,28 @@ export async function getAllCategories(): Promise<Category[]> {
     include: { category: true },
   });
 
-  const categoryMap = new Map<string, number>();
+  // Count by slug to ensure accurate matching with category pages
+  const categoryMap = new Map<string, { name: string; count: number }>();
 
   posts.forEach((post) => {
     if (post.category) {
-      categoryMap.set(post.category.name, (categoryMap.get(post.category.name) || 0) + 1);
+      const slug = normalizeCategoryToSlug(post.category.name);
+      const existing = categoryMap.get(slug);
+      if (existing) {
+        existing.count++;
+      } else {
+        categoryMap.set(slug, {
+          name: post.category.name,
+          count: 1,
+        });
+      }
     }
   });
 
   return Array.from(categoryMap.entries())
-    .map(([name, count]) => ({
+    .map(([slug, { name, count }]) => ({
       name,
-      slug: normalizeCategoryToSlug(name),
+      slug,
       count,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
