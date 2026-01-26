@@ -24,28 +24,66 @@ export function extractFAQsFromMDX(content: string): FAQItem[] {
     
     // Try to extract items prop - handles both JSX object and array syntax
     // Pattern: items={[...]} or items={[{...}]}
-    const itemsMatch = attributes.match(/items\s*=\s*\{([\s\S]*?)\}/);
+    // Use balanced brace matching to handle nested structures
+    const itemsPropMatch = attributes.match(/items\s*=\s*\{/);
     
-    if (itemsMatch) {
-      const itemsString = itemsMatch[1].trim();
+    if (itemsPropMatch) {
+      const startIndex = itemsPropMatch.index! + itemsPropMatch[0].length;
+      let braceDepth = 1;
+      let i = startIndex;
+      let inString = false;
+      let stringChar = '';
       
-      // Try to parse as JSON-like structure
-      // Handle both array literal and object literal syntax
-      try {
-        // Clean up the string - remove comments, handle JSX syntax
-        const cleaned = itemsString
-          .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
-          .replace(/\/\/.*$/gm, '') // Remove line comments
-          .trim();
+      // Find the matching closing brace by tracking depth
+      while (i < attributes.length && braceDepth > 0) {
+        const char = attributes[i];
+        const prevChar = i > 0 ? attributes[i - 1] : '';
         
-        // If it starts with [, it's an array
-        if (cleaned.startsWith('[')) {
-          // Try to extract individual FAQ objects
-          const faqObjects = extractFAQObjectsFromArray(cleaned);
-          faqs.push(...faqObjects);
+        // Handle string literals (don't count braces inside strings)
+        if ((char === '"' || char === "'") && prevChar !== '\\') {
+          if (!inString) {
+            inString = true;
+            stringChar = char;
+          } else if (char === stringChar) {
+            inString = false;
+            stringChar = '';
+          }
+        } else if (!inString) {
+          if (char === '{') {
+            braceDepth++;
+          } else if (char === '}') {
+            braceDepth--;
+          }
         }
-      } catch (error) {
-        console.warn('Failed to parse FAQ items:', error);
+        
+        i++;
+      }
+      
+      if (braceDepth === 0) {
+        // Extract the content between the braces
+        const itemsString = attributes.slice(startIndex, i - 1).trim();
+      
+        // Try to parse as JSON-like structure
+        // Handle both array literal and object literal syntax
+        try {
+          // Clean up the string - remove comments, handle JSX syntax
+          const cleaned = itemsString
+            .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
+            .replace(/\/\/.*$/gm, '') // Remove line comments
+            .trim();
+          
+          // If it starts with [, it's an array
+          if (cleaned.startsWith('[')) {
+            // Try to extract individual FAQ objects
+            const faqObjects = extractFAQObjectsFromArray(cleaned);
+            faqs.push(...faqObjects);
+          }
+        } catch (error) {
+          console.warn('Failed to parse FAQ items:', error);
+        }
+      } else {
+        // Brace matching failed - malformed JSX
+        console.warn('Failed to extract FAQ items: unbalanced braces in items prop');
       }
     }
   }

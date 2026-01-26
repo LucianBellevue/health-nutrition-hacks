@@ -84,20 +84,23 @@ export async function PUT(
     const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
     const readingTime = Math.ceil(wordCount / 200);
 
-    // Merge author metadata with existing metadata (preserve FAQs if they exist)
-    let updatedMetadata = metadata || {};
-    if (metadata) {
-      const existingPost = await prisma.post.findUnique({
-        where: { id },
-        select: { metadata: true },
-      });
-      
-      if (existingPost?.metadata && typeof existingPost.metadata === 'object') {
-        updatedMetadata = {
-          ...(existingPost.metadata as object),
-          ...metadata,
-        };
-      }
+    // Preserve existing metadata and merge with new metadata if provided
+    // This ensures FAQs, author attribution, and other metadata are not lost
+    const currentPost = await prisma.post.findUnique({
+      where: { id },
+      select: { metadata: true },
+    });
+    
+    let updatedMetadata = currentPost?.metadata && typeof currentPost.metadata === 'object'
+      ? { ...(currentPost.metadata as object) }
+      : {};
+    
+    // If new metadata is provided, merge it with existing (new values override existing)
+    if (metadata && typeof metadata === 'object') {
+      updatedMetadata = {
+        ...updatedMetadata,
+        ...metadata,
+      };
     }
 
     const post = await prisma.post.update({
@@ -116,7 +119,7 @@ export async function PUT(
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
         readingTime,
-        metadata: Object.keys(updatedMetadata).length > 0 ? updatedMetadata : null,
+        metadata: Object.keys(updatedMetadata).length > 0 ? updatedMetadata : undefined,
       },
     });
 

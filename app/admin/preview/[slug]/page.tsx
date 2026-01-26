@@ -17,6 +17,7 @@ import PostImage from '@/components/PostImage';
 import ProductCard from '@/components/ProductCard';
 import BackButton from '@/components/BackButton';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import ContentDisclosure from '@/components/ContentDisclosure';
 import { AlertCircle } from 'lucide-react';
 
 // Dynamic imports for non-critical components
@@ -78,14 +79,70 @@ export default async function PreviewPage({ params }: Props) {
     notFound();
   }
 
-  // Get author information
-  const author = getAuthorByIdOrDefault(post.authorId);
+  // Get author information from metadata or fallback to default
+  let author;
+  let shouldShowDisclosure = false; // Track if we should show AI disclosure
+  
+  if (post.metadata && typeof post.metadata === 'object') {
+    const metadata = post.metadata as { 
+      authorId?: string; 
+      customAuthor?: { 
+        name: string; 
+        bio: string; 
+        avatarUrl: string; 
+        social?: { 
+          website?: string; 
+          twitter?: string; 
+          linkedin?: string 
+        } 
+      } 
+    };
+    
+    // Check for custom author first (human author - no disclosure)
+    if (metadata.customAuthor && metadata.authorId === 'custom') {
+      author = {
+        id: 'custom',
+        name: metadata.customAuthor.name,
+        bio: metadata.customAuthor.bio,
+        avatarUrl: metadata.customAuthor.avatarUrl || '/hnh_logo.svg',
+        social: metadata.customAuthor.social,
+      };
+      shouldShowDisclosure = false; // Custom authors are human - no disclosure
+    } 
+    // Check for specific author ID
+    else if (metadata.authorId && metadata.authorId !== 'custom') {
+      author = getAuthorByIdOrDefault(metadata.authorId);
+      // Only show disclosure if explicitly editorial team
+      shouldShowDisclosure = author.id === 'editorial-team' || author.id === 'editorial-reviewer';
+    }
+    // No authorId in metadata = default to editorial team (show disclosure)
+    else {
+      author = getAuthorByIdOrDefault(post.authorId);
+      shouldShowDisclosure = true; // Default = editorial team = show disclosure
+    }
+  } else {
+    // No metadata = default to editorial team (show disclosure)
+    author = getAuthorByIdOrDefault(post.authorId);
+    shouldShowDisclosure = true; // Default = editorial team = show disclosure
+  }
 
-  const formattedDate = new Date(post.createdAt).toLocaleDateString('en-US', {
+  // Use updatedAt if post has been updated, otherwise use createdAt
+  // Ensure dates are Date objects
+  const updatedAt = post.updatedAt instanceof Date ? post.updatedAt : new Date(post.updatedAt);
+  const createdAt = post.createdAt instanceof Date ? post.createdAt : new Date(post.createdAt);
+  
+  const displayDate = updatedAt.getTime() !== createdAt.getTime()
+    ? updatedAt
+    : createdAt;
+  
+  const formattedDate = displayDate.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
+  
+  // Check if post was updated (for showing "Updated" label)
+  const isUpdated = updatedAt.getTime() !== createdAt.getTime();
 
   return (
     <article className="min-h-screen bg-white dark:bg-zinc-950">
@@ -144,7 +201,14 @@ export default async function PreviewPage({ params }: Props) {
                 <span>•</span>
               </>
             )}
-            <time dateTime={post.createdAt.toISOString()}>{formattedDate}</time>
+            <time dateTime={displayDate.toISOString()}>
+              {formattedDate}
+              {isUpdated && (
+                <span className="ml-2 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium rounded">
+                  Updated
+                </span>
+              )}
+            </time>
             {post.readingTime && (
               <>
                 <span>•</span>
@@ -177,6 +241,9 @@ export default async function PreviewPage({ params }: Props) {
 
         {/* Author Box - Top */}
         <AuthorBox author={author} />
+
+        {/* Content Disclosure - Show for editorial team only */}
+        {shouldShowDisclosure && <ContentDisclosure />}
 
         {/* Article Content */}
         <Prose>

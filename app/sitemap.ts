@@ -25,7 +25,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const imageUrl = post.metadata.image.startsWith('http')
         ? post.metadata.image
         : `${siteUrl}${post.metadata.image.startsWith('/') ? '' : '/'}${post.metadata.image}`;
-      
       // Next.js sitemap images property expects array of image URLs
       sitemapEntry.images = [imageUrl];
     }
