@@ -125,11 +125,12 @@ export async function getAllCategories(): Promise<Category[]> {
   });
 
   // Count by slug to ensure accurate matching with category pages
+  // Use the database slug directly instead of recomputing to avoid inconsistencies
   const categoryMap = new Map<string, { name: string; count: number }>();
 
   posts.forEach((post) => {
     if (post.category) {
-      const slug = normalizeCategoryToSlug(post.category.name);
+      const slug = post.category.slug; // Use database slug directly
       const existing = categoryMap.get(slug);
       if (existing) {
         existing.count++;
