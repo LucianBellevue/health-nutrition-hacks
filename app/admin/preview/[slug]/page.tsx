@@ -10,6 +10,7 @@ import AffiliateBlock from '@/components/AffiliateBlock';
 import AuthorBox from '@/components/AuthorBox';
 import CategoryBadge from '@/components/CategoryBadge';
 import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import Image from 'next/image';
@@ -37,10 +38,10 @@ const components = {
   AdSenseInArticle,
 };
 
-// MDX options
+// MDX options: remark-breaks turns single newlines into <br> so paragraph spacing in the editor matches the published post
 const options = {
   mdxOptions: {
-    remarkPlugins: [remarkGfm],
+    remarkPlugins: [remarkGfm, remarkBreaks],
     rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings],
   },
 };
