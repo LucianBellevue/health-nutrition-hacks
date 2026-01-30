@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     'Get in touch with Health Nutrition Hacks. Have questions about nutrition, health tips, or partnership opportunities? We\'d love to hear from you.',
   alternates: {
-    canonical: '/contact',
+    canonical: `${SITE_URL}/contact`,
   },
   openGraph: {
     title: 'Contact Us | Health Nutrition Hacks',
@@ -39,10 +39,41 @@ export const metadata: Metadata = {
   },
 };
 
+const contactPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: 'Contact Us | Health Nutrition Hacks',
+  url: `${SITE_URL}/contact`,
+  description: 'Get in touch with Health Nutrition Hacks for questions about nutrition, health tips, or partnership opportunities.',
+  mainEntity: {
+    '@type': 'Organization',
+    name: 'Health Nutrition Hacks',
+    telephone: '+1-706-460-1201',
+    email: 'info@healthnutritionhacks.com',
+    url: `${SITE_URL}/contact`,
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+1-706-460-1201',
+      email: 'info@healthnutritionhacks.com',
+      contactType: 'customer service',
+      areaServed: 'US',
+      availableLanguage: 'English',
+    },
+  },
+};
+
 export default function ContactLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactPageSchema) }}
+      />
+      {children}
+    </>
+  );
 }

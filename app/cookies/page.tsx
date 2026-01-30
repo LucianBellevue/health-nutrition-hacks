@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 const SITE_URL = 'https://healthnutritionhacks.com';
 const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
   title: 'Cookie Policy – Health Nutrition Hacks',
   description: 'Learn how Health Nutrition Hacks uses cookies and similar technologies to improve your browsing experience.',
   alternates: {
-    canonical: '/cookies',
+    canonical: `${SITE_URL}/cookies`,
   },
   openGraph: {
     title: 'Cookie Policy – Health Nutrition Hacks',
@@ -34,20 +35,14 @@ export const metadata: Metadata = {
 };
 
 export default function CookiePolicyPage() {
+  const breadcrumbItems = [{ name: 'Cookie Policy', href: '/cookies' }];
+
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <Breadcrumbs items={breadcrumbItems} />
         {/* Header */}
         <div className="mb-10">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors mb-6"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Home
-          </Link>
           <h1 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-100 mb-4">
             Cookie Policy
           </h1>
@@ -226,12 +221,18 @@ export default function CookiePolicyPage() {
             <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
               If you have any questions about our use of cookies or this Cookie Policy, please contact us at:
             </p>
-            <p className="mt-4">
+            <p className="mt-4 space-y-2">
               <a 
                 href="mailto:privacy@healthnutritionhacks.com" 
-                className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium"
+                className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium block"
               >
                 privacy@healthnutritionhacks.com
+              </a>
+              <a 
+                href="tel:+17064601201" 
+                className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium block"
+              >
+                +1 (706) 460-1201
               </a>
             </p>
           </section>

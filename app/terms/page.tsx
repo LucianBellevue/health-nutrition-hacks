@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 const EFFECTIVE_DATE = "December 12, 2025";
 
@@ -55,15 +56,23 @@ const sections = [
   {
     heading: "Contact",
     body: [
-      "If you have questions about these Terms, reach us at ",
-      <a
-        key="terms-email"
-        href="mailto:info@healthnutritionhacks.com"
-        className="text-emerald-400 hover:text-emerald-300 underline-offset-4 hover:underline"
-      >
-        info@healthnutritionhacks.com
-      </a>,
-      ".",
+      <>
+        If you have questions about these Terms, reach us at{' '}
+        <a
+          href="mailto:info@healthnutritionhacks.com"
+          className="text-emerald-400 hover:text-emerald-300 underline-offset-4 hover:underline"
+        >
+          info@healthnutritionhacks.com
+        </a>
+        , or call{' '}
+        <a
+          href="tel:+17064601201"
+          className="text-emerald-400 hover:text-emerald-300 underline-offset-4 hover:underline"
+        >
+          +1 (706) 460-1201
+        </a>
+        .
+      </>,
     ],
   },
 ];
@@ -76,7 +85,7 @@ export const metadata: Metadata = {
   description:
     "Please review the Terms of Service governing how you may use the Health Nutrition Hacks website and content.",
   alternates: {
-    canonical: "/terms",
+    canonical: `${SITE_URL}/terms`,
   },
   openGraph: {
     title: "Terms of Service | Health Nutrition Hacks",
@@ -104,9 +113,12 @@ export const metadata: Metadata = {
 };
 
 export default function TermsOfServicePage() {
+  const breadcrumbItems = [{ name: 'Terms of Service', href: '/terms' }];
+
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
+        <Breadcrumbs items={breadcrumbItems} />
         <header className="space-y-3 text-center md:text-left">
           <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">Effective: {EFFECTIVE_DATE}</p>
           <h1 className="text-4xl font-semibold text-white">Terms of Service</h1>

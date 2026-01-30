@@ -4,6 +4,7 @@ import { getAllCategories, getPostsByCategory, getCategoryBySlug } from '@/lib/d
 import PostCard from '@/components/PostCard';
 import Pagination from '@/components/Pagination';
 import Link from 'next/link';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 // Posts per page for category pages
 const POSTS_PER_PAGE = 9;
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${category.name} – Health Nutrition Hacks`,
     description: `Browse all ${category.name.toLowerCase()} posts. ${category.count} articles about ${category.name.toLowerCase()}.`,
     alternates: {
-      canonical: `/categories/${categorySlug}`,
+      canonical: `${SITE_URL}/categories/${categorySlug}`,
     },
     openGraph: {
       title: `${category.name} – Health Nutrition Hacks`,
@@ -118,17 +119,15 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     );
   }
 
+  const breadcrumbItems = [
+    { name: 'Categories', href: '/categories' },
+    { name: category.name, href: `/categories/${categorySlug}` },
+  ];
+
   return (
     <div className="min-h-screen bg-zinc-950">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-zinc-400 mb-6">
-          <Link href="/categories" className="hover:text-emerald-400 transition-colors">
-            Categories
-          </Link>
-          <span>/</span>
-          <span className="text-white font-medium">{category.name}</span>
-        </nav>
+        <Breadcrumbs items={breadcrumbItems} />
 
         {/* Header Section */}
         <div className="mb-12">

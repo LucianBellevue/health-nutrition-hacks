@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 type ActionType = 'unsubscribe' | 'resubscribe';
 type Status = 'idle' | 'loading' | 'success' | 'error';
@@ -66,9 +67,12 @@ export default function UnsubscribePage() {
     }
   };
 
+  const breadcrumbItems = [{ name: 'Unsubscribe', href: '/unsubscribe' }];
+
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950">
       <div className="max-w-xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        <Breadcrumbs items={breadcrumbItems} />
         {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 mb-6">

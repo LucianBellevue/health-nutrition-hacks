@@ -159,6 +159,27 @@ function Footer() {
 
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-widest text-emerald-600 mb-4">
+              Contact
+            </h3>
+            <ul className="space-y-3 text-sm">
+              <li>
+                <a
+                  href="tel:+17064601201"
+                  className="text-zinc-600 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                >
+                  +1 (706) 460-1201
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:info@healthnutritionhacks.com"
+                  className="text-zinc-600 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                >
+                  info@healthnutritionhacks.com
+                </a>
+              </li>
+            </ul>
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-emerald-600 mb-4 mt-6">
               Connect
             </h3>
             <div className="flex items-center gap-4">

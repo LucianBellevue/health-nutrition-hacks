@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 const LAST_UPDATED = "December 12, 2025";
 
@@ -50,15 +51,23 @@ const sections = [
   {
     heading: "Contact Us",
     body: [
-      "If you have questions about this Privacy Policy or how we handle your data, email us at ",
-      <a
-        key="privacy-email"
-        href="mailto:info@healthnutritionhacks.com"
-        className="text-emerald-400 hover:text-emerald-300 underline-offset-4 hover:underline"
-      >
-        info@healthnutritionhacks.com
-      </a>,
-      ".",
+      <>
+        If you have questions about this Privacy Policy or how we handle your data, email us at{' '}
+        <a
+          href="mailto:info@healthnutritionhacks.com"
+          className="text-emerald-400 hover:text-emerald-300 underline-offset-4 hover:underline"
+        >
+          info@healthnutritionhacks.com
+        </a>
+        , or call us at{' '}
+        <a
+          href="tel:+17064601201"
+          className="text-emerald-400 hover:text-emerald-300 underline-offset-4 hover:underline"
+        >
+          +1 (706) 460-1201
+        </a>
+        .
+      </>,
     ],
   },
 ];
@@ -71,7 +80,7 @@ export const metadata: Metadata = {
   description:
     "Learn how Health Nutrition Hacks collects, uses, and protects your personal information.",
   alternates: {
-    canonical: "/privacy",
+    canonical: `${SITE_URL}/privacy`,
   },
   openGraph: {
     title: "Privacy Policy | Health Nutrition Hacks",
@@ -99,9 +108,12 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPolicyPage() {
+  const breadcrumbItems = [{ name: 'Privacy Policy', href: '/privacy' }];
+
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
+        <Breadcrumbs items={breadcrumbItems} />
         <header className="space-y-3 text-center md:text-left">
           <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">
             Last updated: {LAST_UPDATED}

@@ -84,6 +84,11 @@ export const metadata: Metadata = {
     description: "Evidence-based nutrition tips, healthy recipes, and actionable wellness guidance.",
     images: [OG_IMAGE],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: 'index, follow',
+  },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },

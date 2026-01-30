@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 const SITE_URL = 'https://healthnutritionhacks.com';
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent('About Us - Meet Our Team')}&category=About&author=HNH Team`;
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
     'Learn about Health Nutrition Hacks, our mission to provide evidence-based nutrition guidance, and meet our team of nutrition experts and health professionals.',
   keywords: ['about health nutrition hacks', 'nutrition experts', 'health team', 'evidence-based nutrition'],
   alternates: {
-    canonical: '/about',
+    canonical: `${SITE_URL}/about`,
   },
   openGraph: {
     title: 'About Us | Health Nutrition Hacks',
@@ -56,18 +57,25 @@ const organizationSchema = {
   ],
   contactPoint: {
     '@type': 'ContactPoint',
+    telephone: '+1-706-460-1201',
     email: 'info@healthnutritionhacks.com',
     contactType: 'Customer Service',
+    url: 'https://healthnutritionhacks.com/contact',
+    areaServed: 'US',
   },
 };
 
 export default function AboutPage() {
+  const breadcrumbItems = [{ name: 'About', href: '/about' }];
+
   return (
     <div className="min-h-screen bg-linear-to-b from-zinc-950 via-zinc-900 to-zinc-950">
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 sm:py-24">
         <div className="absolute inset-0 bg-linear-to-br from-emerald-950/40 via-teal-950/30 to-cyan-950/20" />
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumbs items={breadcrumbItems} />
+          <div className="text-center">
           <span className="inline-flex items-center text-xs uppercase tracking-[0.4em] text-emerald-400 font-semibold mb-4">
             About Us
           </span>
@@ -78,6 +86,7 @@ export default function AboutPage() {
             Health Nutrition Hacks was founded to cut through diet culture noise and deliver practical,
             science-backed nutrition strategies that actually work for busy, health-conscious individuals.
           </p>
+          </div>
         </div>
       </section>
 

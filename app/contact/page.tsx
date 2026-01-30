@@ -1,6 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Breadcrumbs from '@/components/Breadcrumbs';
+
+const CONTACT_PHONE = '+1 (706) 460-1201';
+const CONTACT_PHONE_TEL = 'tel:+17064601201';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -48,9 +52,12 @@ export default function ContactPage() {
     }
   };
 
+  const breadcrumbItems = [{ name: 'Contact', href: '/contact' }];
+
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
+        <Breadcrumbs items={breadcrumbItems} />
         <header className="space-y-3 text-center md:text-left">
           <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">
             Get in Touch
@@ -183,7 +190,25 @@ export default function ContactPage() {
         </div>
 
         {/* Additional contact info */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600/20 flex items-center justify-center">
+              <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.894.553l3.3 6.6a1 1 0 01.553.894V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-white">Call Us</h3>
+            <p className="text-sm text-zinc-400">
+              Simple inquiries and basic information
+            </p>
+            <a
+              href={CONTACT_PHONE_TEL}
+              className="inline-block text-emerald-400 hover:text-emerald-300 text-sm font-medium"
+            >
+              {CONTACT_PHONE}
+            </a>
+          </div>
+
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-600/20 flex items-center justify-center">
               <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

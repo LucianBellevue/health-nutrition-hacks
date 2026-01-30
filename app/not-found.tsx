@@ -7,6 +7,10 @@ const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
 export const metadata: Metadata = {
   title: 'Page Not Found – Health Nutrition Hacks',
   description: 'The page you are looking for does not exist or has been moved.',
+  robots: {
+    index: false,
+    follow: true,
+  },
   openGraph: {
     title: 'Page Not Found – Health Nutrition Hacks',
     description: 'The page you are looking for does not exist or has been moved.',

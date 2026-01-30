@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     'Manage your Health Nutrition Hacks newsletter subscription. Unsubscribe or resubscribe to our weekly nutrition tips and wellness advice.',
   alternates: {
-    canonical: '/unsubscribe',
+    canonical: `${SITE_URL}/unsubscribe`,
   },
   openGraph: {
     title: 'Manage Subscription | Health Nutrition Hacks',

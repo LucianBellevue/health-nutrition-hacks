@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 const LAST_REVIEWED = "December 12, 2025";
 
@@ -41,15 +42,23 @@ const sections = [
   {
     heading: "Contact Us",
     body: [
-      "If you have any questions about this disclaimer, please email us at ",
-      <a
-        key="disclaimer-email"
-        href="mailto:info@healthnutritionhacks.com"
-        className="text-emerald-400 hover:text-emerald-300 underline-offset-4 hover:underline"
-      >
-        info@healthnutritionhacks.com
-      </a>,
-      ".",
+      <>
+        If you have any questions about this disclaimer, please email us at{' '}
+        <a
+          href="mailto:info@healthnutritionhacks.com"
+          className="text-emerald-400 hover:text-emerald-300 underline-offset-4 hover:underline"
+        >
+          info@healthnutritionhacks.com
+        </a>
+        , or call{' '}
+        <a
+          href="tel:+17064601201"
+          className="text-emerald-400 hover:text-emerald-300 underline-offset-4 hover:underline"
+        >
+          +1 (706) 460-1201
+        </a>
+        .
+      </>,
     ],
   },
 ];
@@ -62,7 +71,7 @@ export const metadata: Metadata = {
   description:
     "Understand the Health Nutrition Hacks disclaimer regarding medical, nutrition, and wellness information.",
   alternates: {
-    canonical: "/disclaimer",
+    canonical: `${SITE_URL}/disclaimer`,
   },
   openGraph: {
     title: "Medical & Nutrition Disclaimer | Health Nutrition Hacks",
@@ -90,9 +99,12 @@ export const metadata: Metadata = {
 };
 
 export default function DisclaimerPage() {
+  const breadcrumbItems = [{ name: 'Disclaimer', href: '/disclaimer' }];
+
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
+        <Breadcrumbs items={breadcrumbItems} />
         <header className="space-y-3 text-center md:text-left">
           <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">
             Last reviewed: {LAST_REVIEWED}

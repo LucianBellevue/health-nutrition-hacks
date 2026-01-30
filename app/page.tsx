@@ -73,7 +73,10 @@ const organizationSchema = {
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "Customer Service",
+    telephone: "+1-706-460-1201",
+    email: "info@healthnutritionhacks.com",
     url: "https://healthnutritionhacks.com/contact",
+    areaServed: "US",
   },
 };
 

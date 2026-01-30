@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { getAllCategories, normalizeCategoryToSlug } from "@/lib/db-posts";
 import { CATEGORY_CATALOG } from "@/lib/categoryConfig";
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 const SITE_URL = 'https://healthnutritionhacks.com';
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent('Browse All Categories')}&category=Categories&author=HNH Team`;
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   title: 'Categories – Health Nutrition Hacks',
   description: 'Browse all categories of nutrition and health topics.',
   alternates: {
-    canonical: '/categories',
+    canonical: `${SITE_URL}/categories`,
   },
   openGraph: {
     title: 'Categories – Health Nutrition Hacks',
@@ -53,9 +54,12 @@ export default async function CategoriesPage() {
     };
   });
 
+  const breadcrumbItems = [{ name: 'Categories', href: '/categories' }];
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <Breadcrumbs items={breadcrumbItems} />
         {/* Header Section */}
         <div className="text-center mb-12">
           <p className="text-sm uppercase tracking-[0.4em] text-emerald-400 mb-4">Categories</p>
