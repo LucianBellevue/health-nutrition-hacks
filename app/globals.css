@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* 
  * CSS Layer Priority (Tailwind v4):
@@ -84,6 +85,21 @@ body {
  * DO NOT use !important for general element styles
  */
 @layer components {
+  /* Paragraph spacing in posts - ensure space between paragraphs (typography plugin + explicit backup) */
+  article p,
+  .prose p {
+    margin-top: 1.25em !important;
+    margin-bottom: 1.25em !important;
+  }
+  article p:first-child,
+  .prose p:first-child {
+    margin-top: 0 !important;
+  }
+  article p:last-child,
+  .prose p:last-child {
+    margin-bottom: 0 !important;
+  }
+
   /* Only apply to content within article tags or .prose class */
   article h2,
   .prose h2 {
