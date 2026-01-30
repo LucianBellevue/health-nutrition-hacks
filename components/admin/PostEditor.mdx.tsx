@@ -68,6 +68,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   const router = useRouter();
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedFormRef = useRef<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadingInline, setUploadingInline] = useState(false);
@@ -122,6 +123,9 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   });
   const [showAuthorFields, setShowAuthorFields] = useState(false);
   const [tagInput, setTagInput] = useState('');
+  const [showDraftModal, setShowDraftModal] = useState(false);
+  const [pendingDraft, setPendingDraft] = useState<PostData | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Character count helpers
   const titleLength = formData.title.length;
@@ -144,9 +148,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
         if (categoriesRes.ok) {
           const data = await categoriesRes.json();
           setCategories(data);
-          if (!formData.categoryId && data.length > 0) {
-            setFormData((prev) => ({ ...prev, categoryId: data[0].id }));
-          }
+          // Do not auto-set category; user must choose (required on publish)
         }
 
         // Extract unique tags from all posts
@@ -160,7 +162,6 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       }
     }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto-save to localStorage every 30 seconds
@@ -187,20 +188,22 @@ export default function PostEditor({ initialData }: PostEditorProps) {
     };
   }, [formData]);
 
-  // Load draft from localStorage on mount (only for new posts)
+  // Initialize last-saved snapshot (for dirty check)
+  useEffect(() => {
+    lastSavedFormRef.current = JSON.stringify(formData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Load draft from localStorage on mount (only for new posts) – show modal instead of confirm
   useEffect(() => {
     if (!initialData?.id) {
       try {
         const draft = localStorage.getItem('post-draft');
         if (draft) {
-          const parsed = JSON.parse(draft);
+          const parsed = JSON.parse(draft) as PostData;
           if (parsed.title || parsed.content) {
-            const shouldLoad = window.confirm('Found a saved draft. Would you like to load it?');
-            if (shouldLoad) {
-              setFormData(parsed);
-            } else {
-              localStorage.removeItem('post-draft');
-            }
+            setPendingDraft(parsed);
+            setShowDraftModal(true);
           }
         }
       } catch (error) {
@@ -209,6 +212,33 @@ export default function PostEditor({ initialData }: PostEditorProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleLoadDraft = () => {
+    if (pendingDraft) {
+      setFormData(pendingDraft);
+      lastSavedFormRef.current = JSON.stringify(pendingDraft);
+      setPendingDraft(null);
+      setShowDraftModal(false);
+    }
+  };
+
+  const handleDiscardDraft = () => {
+    localStorage.removeItem('post-draft');
+    setPendingDraft(null);
+    setShowDraftModal(false);
+  };
+
+  // Unsaved changes: beforeunload when dirty
+  const isDirty = lastSavedFormRef.current !== null && JSON.stringify(formData) !== lastSavedFormRef.current;
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
 
   // Check if slug exists
   useEffect(() => {
@@ -274,6 +304,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;
+    if (validationErrors.title) setValidationErrors((prev) => ({ ...prev, title: '' }));
     setFormData((prev) => ({
       ...prev,
       title,
@@ -506,10 +537,17 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       if (res.ok) {
         const data = await res.json();
         const imageUrl = data.url;
-        
-        // Use standard Image component for Cloudinary URLs
-        const imageComponent = `\n\n<Image src="${imageUrl}" alt="${imageModalData.altText || 'Image'}" width={800} height={450} className="rounded-xl my-8" />\n\n`;
-        
+        const alt = imageModalData.altText || 'Image';
+        const variant = imageModalData.variant;
+        // Hero: full-width; Section: standard; Inline: smaller
+        const variantConfig = {
+          hero: { width: 1200, height: 630, className: 'rounded-xl my-8 w-full' },
+          section: { width: 800, height: 450, className: 'rounded-xl my-8' },
+          inline: { width: 400, height: 225, className: 'rounded-lg my-4 max-w-md' },
+        };
+        const cfg = variantConfig[variant] || variantConfig.section;
+        const imageComponent = `\n\n<Image src="${imageUrl}" alt="${alt.replace(/"/g, '&quot;')}" width={${cfg.width}} height={${cfg.height}} className="${cfg.className}" />\n\n`;
+
         setFormData((prev) => ({
           ...prev,
           content: prev.content + imageComponent,
@@ -656,14 +694,27 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   };
 
   const handlePreview = async () => {
-    if (!formData.slug) {
-      alert('Please add a slug before previewing');
+    const slugToUse = formData.slug || (formData.title ? generateSlug(formData.title) : '');
+    if (!slugToUse) {
+      alert('Please add a title or slug before previewing');
       return;
+    }
+    if (!formData.slug && formData.title) {
+      setFormData((prev) => ({ ...prev, slug: slugToUse }));
     }
 
     // Save as draft first (without publishing)
     setSaving(true);
     try {
+      // Featured image alt: auto-fill from title if image set but alt missing
+      const existingMetadata = formData.metadata && typeof formData.metadata === 'object'
+        ? { ...(formData.metadata as Record<string, unknown>) }
+        : {};
+      const featuredAlt = (existingMetadata.featuredImageAlt as string) || (formData.image ? (formData.title || 'Featured image') : undefined);
+      if (formData.image && featuredAlt && !existingMetadata.featuredImageAlt) {
+        (existingMetadata as Record<string, unknown>).featuredImageAlt = featuredAlt;
+      }
+
       // Prepare author data for metadata
       const authorMetadata: {
         authorId?: string;
@@ -678,10 +729,6 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       // If authorId is empty/undefined, it defaults to editorial team (handled server-side)
 
       // Merge existing metadata (featuredImageAlt, etc.) with author metadata
-      const existingMetadata = formData.metadata && typeof formData.metadata === 'object'
-        ? { ...(formData.metadata as Record<string, unknown>) }
-        : {};
-      
       const mergedMetadata = {
         ...existingMetadata,
         ...authorMetadata,
@@ -694,7 +741,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
         metadata?: Record<string, unknown>;
       } = {
         title: formData.title,
-        slug: formData.slug,
+        slug: slugToUse,
         description: formData.description,
         content: formData.content,
         format: formData.format,
@@ -721,7 +768,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
       if (res.ok) {
         // Open preview in new tab
-        window.open(`/admin/preview/${formData.slug}`, '_blank');
+        window.open(`/admin/preview/${slugToUse}`, '_blank');
       } else {
         const data = await res.json();
         alert(data.error || 'Failed to save draft for preview');
@@ -734,8 +781,29 @@ export default function PostEditor({ initialData }: PostEditorProps) {
   };
 
   const handleSubmit = async (publish: boolean) => {
+    if (publish) {
+      const errors: Record<string, string> = {};
+      if (!formData.title.trim()) errors.title = 'Title is required';
+      if (!formData.slug.trim()) errors.slug = 'Slug is required';
+      if (!formData.categoryId) errors.categoryId = 'Category is required';
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        showNotification('error', 'Please fix the required fields before publishing.');
+        return;
+      }
+      setValidationErrors({});
+    }
+
     setSaving(true);
     try {
+      // Featured image alt: auto-fill from title if image set but alt missing
+      const existingMeta = formData.metadata && typeof formData.metadata === 'object'
+        ? { ...(formData.metadata as Record<string, unknown>) }
+        : {};
+      if (formData.image && !existingMeta.featuredImageAlt) {
+        (existingMeta as Record<string, unknown>).featuredImageAlt = formData.title || 'Featured image';
+      }
+
       // Prepare author data for metadata
       const authorMetadata: {
         authorId?: string;
@@ -750,12 +818,8 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       // If authorId is empty/undefined, it defaults to editorial team (handled server-side)
 
       // Merge existing metadata (featuredImageAlt, etc.) with author metadata
-      const existingMetadata = formData.metadata && typeof formData.metadata === 'object'
-        ? { ...(formData.metadata as Record<string, unknown>) }
-        : {};
-      
       const mergedMetadata = {
-        ...existingMetadata,
+        ...existingMeta,
         ...authorMetadata,
       };
 
@@ -802,6 +866,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
         
         // Only redirect when publishing, stay in editor when saving draft
         if (publish) {
+          lastSavedFormRef.current = JSON.stringify(formData);
           showNotification('success', 'Post published successfully!');
           setTimeout(() => {
             router.push('/admin/posts');
@@ -815,6 +880,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               const verifiedPost = await verifyRes.json();
               if (verifiedPost && verifiedPost.id === savedPost.id) {
                 setLastSaved(new Date());
+                lastSavedFormRef.current = JSON.stringify(formData);
                 showNotification('success', '✓ Draft saved successfully!');
               } else {
                 showNotification('error', 'Save verification failed. Please check your post.');
@@ -825,6 +891,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
           } catch {
             // Post was saved but verification failed - show warning
             setLastSaved(new Date());
+            lastSavedFormRef.current = JSON.stringify(formData);
             showNotification('success', '✓ Draft saved (verification skipped)');
           }
         }
@@ -839,8 +906,38 @@ export default function PostEditor({ initialData }: PostEditorProps) {
     }
   };
 
+  const previewSlugOrTitle = formData.slug || (formData.title ? generateSlug(formData.title) : '');
+
   return (
     <div className="space-y-6">
+      {/* Draft found modal */}
+      {showDraftModal && pendingDraft && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" role="dialog" aria-labelledby="draft-modal-title" aria-modal="true">
+          <div className="bg-black rounded-xl shadow-xl max-w-md w-full p-6 border border-emerald-500/30">
+            <h2 id="draft-modal-title" className="text-lg font-semibold text-white mb-2">Draft found</h2>
+            <p className="text-sm text-gray-400 mb-4">
+              Would you like to load your saved draft or start with a blank post?
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleLoadDraft}
+                className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium"
+              >
+                Load draft
+              </button>
+              <button
+                type="button"
+                onClick={handleDiscardDraft}
+                className="flex-1 px-4 py-2.5 bg-zinc-700 text-white rounded-lg hover:bg-zinc-600 font-medium"
+              >
+                Start new
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Save Notification Toast */}
       {saveNotification.show && (
         <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-2xl border-2 flex items-center gap-3 text-sm font-medium animate-in slide-in-from-top-5 ${
@@ -879,16 +976,16 @@ export default function PostEditor({ initialData }: PostEditorProps) {
       </div>
 
       {/* Preview Button - Prominent placement */}
-      {formData.slug && (
+      {(formData.slug || formData.title) && (
         <div className="bg-black border border-emerald-500/30 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-semibold text-white mb-1">Preview Your Post</h3>
-              <p className="text-sm text-emerald-400">See how your post will look before publishing</p>
+              <p className="text-sm text-emerald-400">See how your post will look before publishing {!formData.slug && formData.title && '(slug will be generated from title)'}</p>
             </div>
             <button
               onClick={handlePreview}
-              disabled={saving || slugExists || !formData.slug}
+              disabled={saving || slugExists || !previewSlugOrTitle}
               className="px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium shadow-md">
               <Eye className="h-4 w-4" />
               Open Preview
@@ -910,9 +1007,12 @@ export default function PostEditor({ initialData }: PostEditorProps) {
             type="text"
             value={formData.title}
             onChange={handleTitleChange}
-            className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            className={`w-full px-4 py-2 border rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${validationErrors.title ? 'border-red-500' : 'border-emerald-500/30'}`}
             placeholder="Enter post title"
           />
+          {validationErrors.title && (
+            <p className="text-sm text-red-500 mt-1">{validationErrors.title}</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-white mb-2">
@@ -922,10 +1022,11 @@ export default function PostEditor({ initialData }: PostEditorProps) {
             <input
               type="text"
               value={formData.slug}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, slug: e.target.value }))
-              }
-              className={`flex-1 px-4 py-2 border ${slugExists ? 'border-red-500' : 'border-emerald-500/30'} rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent`}
+              onChange={(e) => {
+                setFormData((prev) => ({ ...prev, slug: e.target.value }));
+                if (validationErrors.slug) setValidationErrors((prev) => ({ ...prev, slug: '' }));
+              }}
+              className={`flex-1 px-4 py-2 border ${slugExists || validationErrors.slug ? 'border-red-500' : 'border-emerald-500/30'} rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent`}
               placeholder="post-url-slug"
             />
             <button
@@ -937,10 +1038,10 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               <RefreshCw className="h-4 w-4" />
             </button>
           </div>
-          {slugExists && (
+          {(slugExists || validationErrors.slug) && (
             <p className="text-sm text-red-500 mt-1 flex items-center gap-1">
               <AlertCircle className="h-4 w-4" />
-              This slug already exists. Choose a unique one.
+              {validationErrors.slug || (slugExists ? 'This slug already exists. Choose a unique one.' : null)}
             </p>
           )}
           <p className="text-xs text-emerald-400 mt-1 flex items-center gap-1">
@@ -1022,10 +1123,11 @@ export default function PostEditor({ initialData }: PostEditorProps) {
             </label>
             <select
               value={formData.categoryId}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, categoryId: e.target.value }))
-              }
-              className="w-full px-4 py-2 border border-emerald-500/30 rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              onChange={(e) => {
+                setFormData((prev) => ({ ...prev, categoryId: e.target.value }));
+                if (validationErrors.categoryId) setValidationErrors((prev) => ({ ...prev, categoryId: '' }));
+              }}
+              className={`w-full px-4 py-2 border rounded-lg bg-zinc-900 text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${validationErrors.categoryId ? 'border-red-500' : 'border-emerald-500/30'}`}
             >
               <option value="">Select a category</option>
               {categories.map((cat) => (
@@ -1034,6 +1136,9 @@ export default function PostEditor({ initialData }: PostEditorProps) {
                 </option>
               ))}
             </select>
+            {validationErrors.categoryId && (
+              <p className="text-sm text-red-500 mt-1">{validationErrors.categoryId}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-white mb-2">
@@ -1672,7 +1777,8 @@ export default function PostEditor({ initialData }: PostEditorProps) {
 
       {/* Quick Actions - Floating Toolbar */}
       <div className="sticky bottom-0 z-30 bg-gradient-to-t from-zinc-950 to-transparent pt-8 pb-4">
-        <div className="flex items-center justify-between bg-black rounded-xl p-4 shadow-lg border-2 border-emerald-500/20">
+        <div className="bg-black rounded-xl p-4 shadow-lg border-2 border-emerald-500/20 space-y-2">
+          <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-sm text-white">
               {formData.published ? (
@@ -1700,7 +1806,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={handlePreview}
-              disabled={saving || slugExists || !formData.slug}
+              disabled={saving || slugExists || !previewSlugOrTitle}
               className="px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2 font-medium border border-emerald-500/30"
               title="Preview post in new tab"
             >
@@ -1735,6 +1841,10 @@ export default function PostEditor({ initialData }: PostEditorProps) {
               )}
             </button>
           </div>
+          </div>
+          {slugExists && (
+            <p className="text-sm text-amber-500">Change the slug to save or publish.</p>
+          )}
         </div>
       </div>
 
@@ -1871,6 +1981,9 @@ export default function PostEditor({ initialData }: PostEditorProps) {
             <h3 className="text-xl font-bold text-white">
               Insert Inline Image
             </h3>
+            <p className="text-sm text-emerald-400">
+              Image will be added at the end of the content.
+            </p>
 
             {/* File Upload */}
             <div>
