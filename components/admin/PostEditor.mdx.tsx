@@ -546,7 +546,7 @@ export default function PostEditor({ initialData }: PostEditorProps) {
           inline: { width: 400, height: 225, className: 'rounded-lg my-4 max-w-md' },
         };
         const cfg = variantConfig[variant] || variantConfig.section;
-        const imageComponent = `\n\n<Image src="${imageUrl}" alt="${alt.replace(/"/g, '&quot;')}" width={${cfg.width}} height={${cfg.height}} className="${cfg.className}" />\n\n`;
+        const imageComponent = `\n\n<Image src="${imageUrl.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}" alt="${escapeAltForJsx(alt)}" width={${cfg.width}} height={${cfg.height}} className="${cfg.className}" />\n\n`;
 
         setFormData((prev) => ({
           ...prev,
@@ -627,6 +627,9 @@ export default function PostEditor({ initialData }: PostEditorProps) {
     return images;
   };
 
+  // Escape alt for JSX attribute (backslash then double-quote)
+  const escapeAltForJsx = (s: string) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
   // Update alt text for a specific image in content
   const updateImageAltText = (content: string, imageIndex: number, newAltText: string): string => {
     const images = extractImagesFromContent(content);
@@ -635,9 +638,9 @@ export default function PostEditor({ initialData }: PostEditorProps) {
     const image = images[imageIndex];
     // Escape special characters in alt text for regex
     const escapedAlt = image.alt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // Replace the alt attribute in the full match
+    // Replace the alt attribute in the full match; escape newAltText for JSX
     const altRegex = new RegExp(`(alt=["'])${escapedAlt}(["'])`, 'g');
-    const newImageMatch = image.fullMatch.replace(altRegex, `$1${newAltText}$2`);
+    const newImageMatch = image.fullMatch.replace(altRegex, `$1${escapeAltForJsx(newAltText)}$2`);
     
     // Replace the original match with the updated one
     return content.replace(image.fullMatch, newImageMatch);
