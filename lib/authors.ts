@@ -1,3 +1,5 @@
+import { SITE_URL } from '@/lib/site-url';
+
 export interface Author {
   id: string;
   name: string;
@@ -52,7 +54,7 @@ export const authors: Author[] = [
     bio: 'Our editorial team consists of nutrition professionals, registered dietitians, and health content specialists who review, fact-check, and verify all content for accuracy and evidence-based information. All articles undergo rigorous editorial review before publication.',
     avatarUrl: '/hnh_logo.svg',
     social: {
-      website: 'https://healthnutritionhacks.com',
+      website: SITE_URL,
     },
   },
   {
@@ -98,7 +100,7 @@ export function getAuthorByIdOrDefault(id: string): Author {
     bio: 'Our editorial team consists of nutrition professionals, registered dietitians, and health content specialists who review, fact-check, and verify all content for accuracy and evidence-based information. All articles undergo rigorous editorial review before publication.',
     avatarUrl: '/hnh_logo.svg',
     social: {
-      website: 'https://healthnutritionhacks.com',
+      website: SITE_URL,
     },
   };
 }

@@ -4,7 +4,8 @@ import { Suspense } from "react";
 import { getRecentPosts } from "@/lib/db-posts";
 import PostCard from "@/components/PostCard";
 
-const SITE_URL = "https://healthnutritionhacks.com";
+import { SITE_URL } from "@/lib/site-url";
+
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent("Evidence-Based Wellness Tips & Meal Prep Guides")}&category=Health&author=HNH Team`;
 
 export const metadata: Metadata = {
@@ -54,14 +55,14 @@ const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Health Nutrition Hacks",
-  url: "https://healthnutritionhacks.com/",
+  url: `${SITE_URL}/`,
   logo: {
     "@type": "ImageObject",
-    url: "https://healthnutritionhacks.com/logo-512.png",
+    url: `${SITE_URL}/logo-512.png`,
     width: 512,
     height: 512,
   },
-  image: "https://healthnutritionhacks.com/og-logo.png",
+  image: `${SITE_URL}/og-logo.png`,
   sameAs: [
     "https://www.facebook.com/profile.php?id=61586863918949",
     "https://www.pinterest.com/healthnutritionhacks",
@@ -75,7 +76,7 @@ const organizationSchema = {
     contactType: "Customer Service",
     telephone: "+1-706-460-1201",
     email: "info@healthnutritionhacks.com",
-    url: "https://healthnutritionhacks.com/contact",
+    url: `${SITE_URL}/contact`,
     areaServed: "US",
   },
 };
@@ -84,21 +85,21 @@ const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Health Nutrition Hacks",
-  url: "https://healthnutritionhacks.com",
+  url: SITE_URL,
   description: "Evidence-based nutrition tips, healthy recipes, and wellness guidance for busy people.",
   publisher: {
     "@type": "Organization",
     name: "Health Nutrition Hacks",
     logo: {
       "@type": "ImageObject",
-      url: "https://healthnutritionhacks.com/logo-512.png",
+      url: `${SITE_URL}/logo-512.png`,
     },
   },
   potentialAction: {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: "https://healthnutritionhacks.com/blog?search={search_term_string}",
+      urlTemplate: `${SITE_URL}/blog?search={search_term_string}`,
     },
     "query-input": "required name=search_term_string",
   },

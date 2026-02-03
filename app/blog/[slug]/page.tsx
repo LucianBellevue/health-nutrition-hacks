@@ -23,6 +23,7 @@ import FAQSection, { FAQItem } from '@/components/FAQSection';
 import ContentDisclosure from '@/components/ContentDisclosure';
 import { generateFAQSchema } from '@/lib/faqSchema';
 import { getFAQsForPost } from '@/lib/faqSync';
+import { SITE_URL } from '@/lib/site-url';
 
 // Dynamic imports for non-critical components to reduce initial JS bundle
 const NewsletterSignup = dynamic(() => import('@/components/NewsletterSignup'), {
@@ -53,8 +54,6 @@ const options = {
 interface Props {
   params: Promise<{ slug: string }>;
 }
-
-const SITE_URL = 'https://healthnutritionhacks.com';
 
 export async function generateStaticParams() {
   const posts = await prisma.post.findMany({

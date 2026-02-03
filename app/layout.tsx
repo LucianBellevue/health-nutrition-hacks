@@ -10,6 +10,7 @@ import ReduxProvider from "@/components/providers/ReduxProvider";
 import ThemeHydrator, { ThemeScript } from "@/components/theme/ThemeProvider";
 import PreferencesHydrator from "@/components/preferences/PreferencesHydrator";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { SITE_URL } from "@/lib/site-url";
 
 // Dynamic imports for non-critical components to reduce initial JS bundle
 // These components are code-split and loaded separately from the main bundle
@@ -28,7 +29,6 @@ const montserrat = Montserrat({
   adjustFontFallback: true, // Adjust fallback font to reduce layout shift
 });
 
-const SITE_URL = "https://healthnutritionhacks.com";
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent("Evidence-Based Nutrition Tips & Healthy Recipes")}&category=Health&author=HNH Team`;
 const OG_LOGO = `${SITE_URL}/og-logo.png`;
 
@@ -108,7 +108,7 @@ export default function RootLayout({
         {/* Inline critical CSS to eliminate render-blocking chain */}
         <CriticalCSS />
         {/* RSS Feed discovery */}
-        <link rel="alternate" type="application/rss+xml" title="Health Nutrition Hacks RSS Feed" href="https://healthnutritionhacks.com/rss.xml" />
+        <link rel="alternate" type="application/rss+xml" title="Health Nutrition Hacks RSS Feed" href={`${SITE_URL}/rss.xml`} />
         {/* Resource hints for faster loading */}
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />

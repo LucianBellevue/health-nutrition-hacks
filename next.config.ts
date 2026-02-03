@@ -123,17 +123,12 @@ const nextConfig: NextConfig = {
     // CSS optimization - enabled for better performance with Tailwind v4
     cssChunking: true,
   },
-  // Redirects for SEO consistency - www redirects to non-www (canonical)
+  // Redirects for SEO consistency: canonical is https only, no www (see lib/site-url.ts)
   async redirects() {
     return [
       {
         source: "/:path*",
-        has: [
-          {
-            type: "host",
-            value: "www.healthnutritionhacks.com",
-          },
-        ],
+        has: [{ type: "host", value: "www.healthnutritionhacks.com" }],
         destination: "https://healthnutritionhacks.com/:path*",
         permanent: true,
       },

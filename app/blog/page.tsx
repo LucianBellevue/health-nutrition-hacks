@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import { getAllPosts, getAllCategories } from '@/lib/db-posts';
 import BlogList from '@/components/BlogList';
+import { SITE_URL } from '@/lib/site-url';
 
 // Dynamic imports for non-critical components to reduce initial JS bundle
 const NewsletterSignup = dynamic(() => import('@/components/NewsletterSignup'), {
@@ -12,7 +13,6 @@ const AdSenseMultiplex = dynamic(() => import('@/components/AdSenseMultiplex'));
 // Posts per page
 const POSTS_PER_PAGE = 9;
 
-const SITE_URL = 'https://healthnutritionhacks.com';
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent('Nutrition Blog - Latest Articles')}&category=Blog&author=HNH Team`;
 
 export const metadata: Metadata = {

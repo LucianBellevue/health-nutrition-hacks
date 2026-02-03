@@ -4,7 +4,8 @@ import { getAllCategories, normalizeCategoryToSlug } from "@/lib/db-posts";
 import { CATEGORY_CATALOG } from "@/lib/categoryConfig";
 import Breadcrumbs from '@/components/Breadcrumbs';
 
-const SITE_URL = 'https://healthnutritionhacks.com';
+import { SITE_URL } from '@/lib/site-url';
+
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent('Browse All Categories')}&category=Categories&author=HNH Team`;
 
 export const metadata: Metadata = {

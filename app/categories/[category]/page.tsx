@@ -5,11 +5,10 @@ import PostCard from '@/components/PostCard';
 import Pagination from '@/components/Pagination';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import { SITE_URL } from '@/lib/site-url';
 
 // Posts per page for category pages
 const POSTS_PER_PAGE = 9;
-
-const SITE_URL = 'https://healthnutritionhacks.com';
 
 interface Props {
   params: Promise<{ category: string }>;

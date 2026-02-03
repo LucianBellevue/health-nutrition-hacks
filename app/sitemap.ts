@@ -1,7 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getAllPosts, getAllCategories } from '@/lib/db-posts';
-
-const SITE_URL = 'https://healthnutritionhacks.com';
+import { SITE_URL } from '@/lib/site-url';
 
 /**
  * XML Sitemap for Google and search engine indexing.

@@ -1,13 +1,13 @@
 import { getAllPosts } from '@/lib/db-posts';
+import { SITE_URL } from '@/lib/site-url';
 
 export async function GET() {
   const posts = await getAllPosts();
-  const siteUrl = 'https://healthnutritionhacks.com';
 
   const rssItems = posts
     .map((post) => {
       const { metadata } = post;
-      const postUrl = `${siteUrl}/blog/${metadata.slug}`;
+      const postUrl = `${SITE_URL}/blog/${metadata.slug}`;
       const pubDate = new Date(metadata.date).toUTCString();
 
       return `
@@ -27,11 +27,11 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Health Nutrition Hacks</title>
-    <link>${siteUrl}</link>
+    <link>${SITE_URL}</link>
     <description>Evidence-based nutrition tips, healthy recipes, and wellness advice</description>
     <language>en-us</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-    <atom:link href="${siteUrl}/rss.xml" rel="self" type="application/rss+xml"/>
+    <atom:link href="${SITE_URL}/rss.xml" rel="self" type="application/rss+xml"/>
     ${rssItems}
   </channel>
 </rss>`;

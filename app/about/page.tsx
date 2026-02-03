@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/Breadcrumbs';
 
-const SITE_URL = 'https://healthnutritionhacks.com';
+import { SITE_URL } from '@/lib/site-url';
+
 const OG_IMAGE = `${SITE_URL}/api/og?title=${encodeURIComponent('About Us - Meet Our Team')}&category=About&author=HNH Team`;
 
 export const metadata: Metadata = {
@@ -46,8 +47,8 @@ const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Health Nutrition Hacks',
-  url: 'https://healthnutritionhacks.com',
-  logo: 'https://healthnutritionhacks.com/hnh_logo.svg',
+  url: SITE_URL,
+  logo: `${SITE_URL}/hnh_logo.svg`,
   description:
     'Evidence-based nutrition hacks, metabolic health strategies, and realistic wellness guidance for busy people.',
   sameAs: [
@@ -60,7 +61,7 @@ const organizationSchema = {
     telephone: '+1-706-460-1201',
     email: 'info@healthnutritionhacks.com',
     contactType: 'Customer Service',
-    url: 'https://healthnutritionhacks.com/contact',
+    url: `${SITE_URL}/contact`,
     areaServed: 'US',
   },
 };

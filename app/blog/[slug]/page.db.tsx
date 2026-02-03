@@ -17,6 +17,7 @@ import ProductCard from '@/components/ProductCard';
 import BackButton from '@/components/BackButton';
 import TrendingArticle from '@/components/TrendingArticle';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import { SITE_URL } from '@/lib/site-url';
 
 // Dynamic imports for non-critical components
 const NewsletterSignup = dynamic(() => import('@/components/NewsletterSignup'), {
@@ -45,8 +46,6 @@ const options = {
 interface Props {
   params: Promise<{ slug: string }>;
 }
-
-const SITE_URL = 'https://healthnutritionhacks.com';
 
 export async function generateStaticParams() {
   const posts = await prisma.post.findMany({
@@ -88,7 +87,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: metaDescription,
       authors: post.author.name ? [{ name: post.author.name }] : undefined,
       alternates: {
-        canonical: `/blog/${slug}`,
+        canonical: `${SITE_URL}/blog/${slug}`,
       },
       openGraph: {
         title: metaTitle,

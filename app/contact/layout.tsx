@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
-const SITE_URL = 'https://healthnutritionhacks.com';
+import { SITE_URL } from '@/lib/site-url';
+
 const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
 
 export const metadata: Metadata = {

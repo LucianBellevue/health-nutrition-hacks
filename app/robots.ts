@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { SITE_URL } from '@/lib/site-url';
 
 /**
  * robots.txt for Google and search engine indexing best practices.
@@ -7,7 +8,6 @@ import { MetadataRoute } from 'next';
  * - Sitemap reference for discovery (https only, no www)
  */
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = 'https://healthnutritionhacks.com';
 
   return {
     rules: [
@@ -35,7 +35,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/', '/api/'],
       },
     ],
-    host: siteUrl,
-    sitemap: `${siteUrl}/sitemap.xml`,
+    host: SITE_URL,
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

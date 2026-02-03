@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Breadcrumbs from '@/components/Breadcrumbs';
+import { SITE_URL } from "@/lib/site-url";
 
 const LAST_UPDATED = "December 12, 2025";
 
@@ -72,7 +73,6 @@ const sections = [
   },
 ];
 
-const SITE_URL = "https://healthnutritionhacks.com";
 const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
 
 export const metadata: Metadata = {

@@ -2,7 +2,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/Breadcrumbs';
 
-const SITE_URL = 'https://healthnutritionhacks.com';
+import { SITE_URL } from '@/lib/site-url';
+
 const OG_IMAGE = `${SITE_URL}/android-chrome-512x512.png`;
 
 export const metadata: Metadata = {
