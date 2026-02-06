@@ -10,6 +10,7 @@ import ReduxProvider from "@/components/providers/ReduxProvider";
 import ThemeHydrator, { ThemeScript } from "@/components/theme/ThemeProvider";
 import PreferencesHydrator from "@/components/preferences/PreferencesHydrator";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { Analytics } from "@vercel/analytics/react";
 import { SITE_URL } from "@/lib/site-url";
 
 // Dynamic imports for non-critical components to reduce initial JS bundle
@@ -133,6 +134,7 @@ export default function RootLayout({
           <Footer />
           <NewsletterPopup />
           <CookieConsent />
+          <Analytics />
         </ReduxProvider>
       </body>
     </html>
